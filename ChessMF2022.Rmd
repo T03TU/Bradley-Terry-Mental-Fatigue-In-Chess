@@ -17,7 +17,7 @@ library(hyper2)
 library(readxl)
 
 #Data
-Fide2022 <- read_excel("~/Academic Life/Master of Analytics/ENGE817 STEM Research paper/Fide2022.xlsx")
+Fide2022 <- read_excel("Fide2022.xlsx")
 View(Fide2022)
 
 #We have 5 players that played 50 games all together

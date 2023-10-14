@@ -17,7 +17,7 @@ library(hyper2)
 library(readxl)
 
 #Data
-Fide1948 <- read_excel("~/Academic Life/Master of Analytics/ENGE817 STEM Research paper/Fide1948.xlsx")
+Fide1948 <- read_excel("Fide1948.xlsx")
 View(Fide1948)
 
 #We have 5 players that played 50 games all together
@@ -410,3 +410,11 @@ test
 ```
 
 The results above show a p-value = `r test$p.value` which is lower than a significance level of 0.05. This suggests that all the entities have different strengths.
+
+Interestingly, Botvinnik has a much higher strength compared to our imaginary fatigue monster of the tournament. We can investigate this by testing if $P_{Bot} = \mathfrak{F}$.
+
+```{r}
+
+sumep.
+```
+
