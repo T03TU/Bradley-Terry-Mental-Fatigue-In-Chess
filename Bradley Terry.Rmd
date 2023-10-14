@@ -1,0 +1,221 @@
+
+
+```{r}
+rm(list = ls())
+library(hyper2)
+```
+
+
+```{r}
+fide23 <- data.frame(
+  Round = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18),
+  Ding = c(1/2,0,1/2,1,0,1,0,1/2,1/2,1/2,1/2,1,1/2,1/2,1/2,1/2,1/2,1),
+  Nepo = c(1/2,1,1/2,0,1,0,1,1/2,1/2,1/2,1/2,0,1/2,1/2,1/2,1/2,1/2,0),
+  White = c("Nepo", "Ding", "Nepo", "Ding", "Nepo", "Ding", "Nepo", "Ding", "Nepo", "Ding", "Nepo", "Ding", "Nepo", "Ding", "Ding", "Nepo", "Ding", "Nepo")
+)
+fide23
+```
+
+
+
+##2022 Candidates game
+```{r}
+rm(list=ls())
+library(readxl)
+fide22 <- read_excel("~/Academic Life/Master of Analytics/ENGE817 STEM Research paper/fide22.xlsx")
+View(fide22)
+```
+
+
+```{r}
+MFgames <- fide22[fide22$Moves >= 40,]; MFgames
+NMFgames <- fide22[fide22$Moves < 40,]
+
+#MF games
+BW_MFgames <- MFgames[MFgames$Black == 1,]; BW_MFgames
+WW_MFgames <- MFgames[MFgames$Black == 0,]; WW_MFgames
+D_MFgames <- MFgames[MFgames$Black == 0.5 | MFgames$White == 0.5,]; D_MFgames
+
+
+#Non-MF games
+BW_NMFgames <- NMFgames[NMFgames$Black == 1,]; BW_NMFgames
+WW_NMFgames <- NMFgames[NMFgames$Black == 0,]; WW_NMFgames
+D_NMFgames <- NMFgames[NMFgames$Black == 0.5 | NMFgames$White == 0.5,]; D_NMFgames
+
+```
+
+```{r}
+NepB <- dim(BW_NMFgames[BW_NMFgames$BlackPlayer == "Nepo",])[1]  
+RadB <- dim(BW_NMFgames[BW_NMFgames$BlackPlayer == "Radjabov",])[1]  
+NepW <- dim(WW_NMFgames[WW_NMFgames$WhitePlayer == "Nepo",])[1] 
+NakW <- dim(WW_NMFgames[WW_NMFgames$WhitePlayer == "Nakamura",])[1]
+RapW <- dim(WW_NMFgames[WW_NMFgames$WhitePlayer == "Rapport",])[1]
+DinWMF <- dim(WW_MFgames[WW_MFgames$WhitePlayer == "Ding",])[1]
+RadWMF <- dim(WW_MFgames[WW_MFgames$WhitePlayer == "Radjabov",])[1]
+NakWMF <- dim(WW_MFgames[WW_MFgames$WhitePlayer == "Nakamura",])[1]
+CarWMF <- dim(WW_MFgames[WW_MFgames$WhitePlayer == "Caruana",])[1]
+FirWMF <- dim(WW_MFgames[WW_MFgames$WhitePlayer == "Firouzja",])[1]
+DudWMF <- dim(WW_MFgames[WW_MFgames$WhitePlayer == "Duda",])[1]
+NepBMF <- dim(BW_MFgames[BW_MFgames$BlackPlayer == "Nepo",])[1]
+DinBMF <- dim(BW_MFgames[BW_MFgames$BlackPlayer == "Ding",])[1]
+CarBMF <- dim(BW_MFgames[BW_MFgames$BlackPlayer == "Caruana",])[1]
+FirBMF <- dim(BW_MFgames[BW_MFgames$BlackPlayer == "Firouzja",])[1]
+D <- dim(D_NMFgames)[1]
+DMF <- dim(D_MFgames)[1]
+
+#Hyper 2
+BT <- hyper2(list("NepB", "RadB", "NepW", "NakW", "RapW", "DinWMF", "RadWMF", "NakWMF", "CarWMF", "FirWMF", "DudWMF", "NepBMF", "DinBMF", "CarBMF", "FirBMF", "D", "DMF"), c(NepB,RadB,NepW,NakW,RapW,DinWMF,RadWMF,NakWMF, CarWMF, FirWMF, DudWMF,NepBMF,DinBMF, CarBMF, FirBMF,D,DMF))
+
+BT[c("NepB", "RadB", "NepW", "NakW", "RapW", "DinWMF", "RadWMF", "NakWMF", "CarWMF", "FirWMF", "DudWMF", "NepBMF", "DinBMF", "CarBMF", "FirBMF", "D", "DMF")] <-- 56
+
+results <- maxp(BT)
+names <- results[0]
+results_df <- data.frame(results,  stringsAsFactors = FALSE)
+MF <- c(results["DinWMF"], results["RadWMF"], results["NakWMF"], results["CarWMF"], 
+results["FirWMF"], results["DudWMF"], results["NepBMF"], results["DinBMF"], results["CarBMF"], results["FirBMF"], results["DMF"])
+```
+
+```{r}
+MF
+```
+```{r}
+NMF <- c(results["NepB"], results["RadB"], results["NakW"], results["RapW"], results["NepW"], results["D"])
+```
+
+#NMF to MF ratio
+```{r}
+NMF_sum <- sum(NMF);NMF_sum
+MF_sum <- sum(MF); MF_sum
+```
+#Fisher's exact test for Wins w.r.t MF
+
+```{r}
+
+wins <- matrix(c(dim(WW_MFgames)[1],dim(WW_NMFgames)[1],dim(BW_MFgames)[1], dim(BW_NMFgames)[1]), nrow =  2, byrow = TRUE)
+
+colnames(wins) <- c("MF", "No MF")
+rownames(wins) <- c("White", "Black")
+
+wins
+
+fisher.test(wins)
+```
+
+#Fisher's exact test for draws w.r.t MF
+```{r}
+ft <- matrix(c(dim(D_MFgames)[1],dim(D_NMFgames)[1],dim(WW_MFgames)[1], dim(WW_NMFgames)[1], dim(BW_MFgames)[1], dim(BW_NMFgames)[1]), nrow =  3, byrow = TRUE)
+
+colnames(ft) <- c("MF", "No MF")
+rownames(ft) <- c("Draw", "White", "Black")
+
+ft
+test <- fisher.test(ft)
+```
+```{r}
+mosaicplot(ft, color = TRUE, main = "Mosaic Plot of Entities and MF (or No MF)")
+
+```
+
+
+
+
+
+#Consistency Measure
+```{r}
+consistency(BT, plot = TRUE)
+```
+
+```{r}
+names <- names(results)
+results_df <- data.frame(Entity = names, Ranking = unique(results))
+results_df
+
+library(ggplot2)
+ggplot(results_df, aes(Ranking,Entity))+ geom_point() + labs(title = "2022 candidates tournament ranking (w.r.t Mental Fatigue)")
+```
+
+##1948 FIDE tournament
+
+```{r}
+#Data
+Fide1948 <- read_excel("~/Academic Life/Master of Analytics/ENGE817 STEM Research paper/Fide1948.xlsx")
+View(Fide1948)
+
+MFgames1948 <- Fide1948[Fide1948$Moves >= 40,]; MFgames1948
+NMFgames1948 <- Fide1948[Fide1948$Moves < 40,]; NMFgames1948
+```
+
+```{r}
+#MF games
+BW_MFgames1948 <- MFgames1948[MFgames1948$Black == 1,]; BW_MFgames1948
+WW_MFgames1948 <- MFgames1948[MFgames1948$Black == 0,]; WW_MFgames1948
+D_MFgames1948 <- MFgames1948[MFgames1948$Black == 0.5 | MFgames1948$White == 0.5,]; D_MFgames1948
+
+
+#Non-MF games
+BW_NMFgames1948 <- NMFgames1948[NMFgames1948$Black == 1,]; BW_NMFgames1948
+WW_NMFgames1948 <- NMFgames1948[NMFgames1948$Black == 0,]; WW_NMFgames1948
+D_NMFgames1948 <- NMFgames1948[NMFgames1948$Black == 0.5 | NMFgames1948$White == 0.5,]; D_NMFgames1948
+```
+
+
+#Fisher's exact test for draws w.r.t MF
+```{r}
+ft1948 <- matrix(c(dim(D_MFgames1948)[1],dim(D_NMFgames1948)[1],dim(WW_MFgames1948)[1], dim(WW_NMFgames1948)[1], dim(BW_MFgames1948)[1], dim(BW_NMFgames1948)[1]), nrow =  3, byrow = TRUE)
+
+colnames(ft1948) <- c("MF", "No MF")
+rownames(ft1948) <- c("Draw", "White", "Black")
+
+ft1948
+test <- fisher.test(ft1948); test
+```
+```{r}
+KerB <- dim(BW_NMFgames1948[BW_NMFgames1948$BlackPlayer == "Keres",])[1]
+
+
+KerW <- dim(WW_NMFgames1948[WW_NMFgames1948$WhitePlayer == "Keres",])[1]
+BotW <- dim(WW_NMFgames1948[WW_NMFgames1948$WhitePlayer == "Botvinnik",])[1]
+
+KerBMF <- dim(BW_MFgames1948[BW_MFgames1948$BlackPlayer == "Keres",])[1]
+SmyBMF <- dim(BW_MFgames1948[BW_MFgames1948$BlackPlayer == "Smyslov",])[1]
+BotBMF <- dim(BW_MFgames1948[BW_MFgames1948$BlackPlayer == "Botvinnik",])[1]
+
+SmyWMF <- dim(WW_MFgames1948[WW_MFgames1948$WhitePlayer == "Smyslov",])[1]
+ResWMF <- dim(WW_MFgames1948[WW_MFgames1948$WhitePlayer == "Reshevsky",])[1]
+
+D <- dim(D_NMFgames1948)[1]
+DMF <- dim(D_MFgames1948)[1]
+
+
+#Hyper 2
+BT1948 <- hyper2(list("KerB", "KerW","BotW", "KerBMF", "SmyBMF", "BotBMF", "SmyWMF", "ResWMF", "D", "DMF"), c(KerB,KerW,BotW,KerBMF,SmyBMF,BotBMF,SmyWMF,ResWMF, D, DMF)); 
+BT1948[c("KerB", "KerW","BotW", "KerBMF", "SmyBMF", "BotBMF", "SmyWMF", "ResWMF", "D", "DMF")] <-- 50
+BT1948
+
+results1948 <- maxp(BT1948)
+results1948
+```
+
+```{r}
+
+names1948 <- names(results1948)
+results1948_df <- data.frame(Entity = names1948, Ranking = unique(results1948))
+results1948_df
+
+library(ggplot2)
+ggplot(results1948_df, aes(Ranking,Entity))+ geom_point() + labs(title = "1948 World Championship ranking (w.r.t Mental Fatigue)")
+```
+
+#Hypothesis Testing
+```{r}
+equalp.test(BT)
+equalp.test(BT1948)
+```
+
+
+
+```{r}
+samep.test(BT, c("D","DMF"))
+samep.test(BT1948, c("D","DMF"))
+```
+

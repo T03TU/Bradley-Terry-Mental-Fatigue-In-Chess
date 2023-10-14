@@ -1,0 +1,412 @@
+---
+title: "ChessMF"
+author: "Toetu"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+Here, I am analyzing the effects of Mental Fatigue (MF) on expert chess players during a game of chess. The data sets that we will be analyzing are the 1948 FIDE world chess championship, and the 2022 candidates games. We will be using the 'Hyper2' package developed by Dr. Hankin. 
+
+```{r}
+library(hyper2)
+library(readxl)
+
+#Data
+Fide1948 <- read_excel("~/Academic Life/Master of Analytics/ENGE817 STEM Research paper/Fide1948.xlsx")
+View(Fide1948)
+
+#We have 5 players that played 50 games all together
+#How many possible games of 2 can occur for 5 players?
+factorial(5)/factorial(5 - 2)
+
+```
+
+#Hyper2 object
+```{r}
+fide48 <- c(
+#Ewue VS Keres
+EuwW_lostTo_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+EuwW_beats_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+EuwW_draws_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+KerW_lostTo_Euw_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+KerW_beats_Euw_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+KerW_draws_Euw_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+EuwW_lostTo_Ker_MF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+EuwW_beats_Ker_MF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+EuwW_draws_Ker_MF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+KerW_lostTo_Euw_MF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+KerW_beats_Euw_MF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+KerW_draws_Euw_MF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+
+#Smyslov VS Reshevsky
+SmyW_lostTo_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+SmyW_beats_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+SmyW_draws_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+ResW_lostTo_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+ResW_beats_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+ResW_draws_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+SmyW_lostTo_Res_MF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+SmyW_beats_Res_MF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+SmyW_draws_Res_MF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+ResW_lostTo_Smy_MF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+ResW_beats_Smy_MF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+ResW_draws_Smy_MF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+
+#Botvinnik VS Euwe
+BotW_lostTo_Euw_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+BotW_beats_Euw_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+BotW_draws_Euw_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+EuwW_lostTo_Bot_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+EuwW_beats_Bot_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+EuwW_draws_Bot_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+BotW_lostTo_Euw_MF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+BotW_beats_Euw_MF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+BotW_draws_Euw_MF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+EuwW_lostTo_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+EuwW_beats_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+EuwW_draws_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+
+#--------------------------------------------------------------------------------------------------------------------------
+
+#Ewue VS Reshevsky
+EuwW_lostTo_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+EuwW_beats_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+EuwW_draws_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+ResW_lostTo_Euw_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+ResW_beats_Euw_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+ResW_draws_Euw_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+EuwW_lostTo_Res_MF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+EuwW_beats_Res_MF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+EuwW_draws_Res_MF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+ResW_lostTo_Euw_MF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+ResW_beats_Euw_MF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+ResW_draws_Euw_MF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Euwe" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+
+#Smyslov VS Keres
+SmyW_lostTo_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+SmyW_beats_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+SmyW_draws_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+KerW_lostTo_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+KerW_beats_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+KerW_draws_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+SmyW_lostTo_Ker_MF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+SmyW_beats_Ker_MF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+SmyW_draws_Ker_MF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+KerW_lostTo_Smy_MF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+KerW_beats_Smy_MF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+KerW_draws_Smy_MF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+
+#Botvinnik VS Smyslov
+BotW_lostTo_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+BotW_beats_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+BotW_draws_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+SmyW_lostTo_Bot_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+SmyW_beats_Bot_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+SmyW_draws_Bot_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+BotW_lostTo_Smy_MF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+BotW_beats_Smy_MF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+BotW_draws_Smy_MF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Smyslov" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+SmyW_lostTo_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+SmyW_beats_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+SmyW_draws_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+
+#--------------------------------------------------------------------------------------------------------------------------
+
+#Ewue VS Smyslov
+EuwW_lostTo_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer == "Smyslov" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+EuwW_beats_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer == "Smyslov" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+EuwW_draws_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer == "Smyslov" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+SmyW_lostTo_Euw_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer == "Euwe" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+SmyW_beats_Euw_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer == "Euwe" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+SmyW_draws_Euw_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer == "Euwe" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+EuwW_lostTo_Smy_MF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer == "Smyslov" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+EuwW_beats_Smy_MF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer == "Smyslov" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+EuwW_draws_Smy_MF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer == "Smyslov" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+SmyW_lostTo_Euw_MF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer == "Euwe" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+SmyW_beats_Euw_MF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer == "Euwe" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+SmyW_draws_Euw_MF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$BlackPlayer == "Euwe" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+
+#Reshevsky VS Botvinnik
+ResW_lostTo_Bot_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer == "Botvinnik" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+ResW_beats_Bot_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer == "Botvinnik" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+ResW_draws_Bot_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer == "Botvinnik" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+BotW_lostTo_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer == "Reshevsky" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+BotW_beats_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer == "Reshevsky" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+BotW_draws_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer == "Reshevsky" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+ResW_lostTo_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer == "Botvinnik" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+ResW_beats_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer == "Botvinnik" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+ResW_draws_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer == "Botvinnik" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+BotW_lostTo_Res_MF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer == "Reshevsky" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+BotW_beats_Res_MF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer == "Reshevsky" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+BotW_draws_Res_MF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer == "Reshevsky" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+
+#Botvinnik VS Keres
+BotW_lostTo_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+BotW_beats_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+BotW_draws_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+KerW_lostTo_Bot_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+KerW_beats_Bot_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+KerW_draws_Bot_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+BotW_lostTo_Ker_MF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+BotW_beats_Ker_MF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+BotW_draws_Ker_MF = dim(Fide1948[Fide1948$WhitePlayer == "Botvinnik" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+KerW_lostTo_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+KerW_beats_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+KerW_draws_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Botvinnik" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+
+#Reshevsky VS Keres
+ResW_lostTo_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+ResW_beats_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+ResW_draws_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+KerW_lostTo_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
+KerW_beats_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
+KerW_draws_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
+ResW_lostTo_Ker_MF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+ResW_beats_Ker_MF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+ResW_draws_Ker_MF = dim(Fide1948[Fide1948$WhitePlayer == "Reshevsky" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1],
+KerW_lostTo_Res_MF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0 & Fide1948$Moves >= 40,])[1],
+KerW_beats_Res_MF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 1 & Fide1948$Moves >= 40,])[1],
+KerW_draws_Res_MF = dim(Fide1948[Fide1948$WhitePlayer == "Keres" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0.5 & Fide1948$Moves >= 40,])[1]
+
+)
+#---------------------------------------------------------------------------------------------------------------------------
+```
+
+
+
+**Hyper 2 object**
+```{r}
+results <- as.list(fide48)
+attach(results)
+H <- hyper2()
+
+# Ewue VS Keres
+Ewue_vs_Keres <- c("Ewue","Keres","white","draw","MF")  # all "players", real and imaginary
+
+#No MF
+H <- H + trial(c("Ewue"  ,"white"), Ewue_vs_Keres, EuwW_beats_Ker_NMF)
+H <- H + trial(c("Keres","white"), Ewue_vs_Keres, KerW_beats_Euw_NMF)
+H <- H + trial(  "Keres"           , Ewue_vs_Keres, EuwW_lostTo_Ker_NMF)
+H <- H + trial(  "Ewue"           , Ewue_vs_Keres, KerW_lostTo_Euw_NMF)
+H <- H + trial(  "draw"             , Ewue_vs_Keres, EuwW_draws_Ker_NMF)
+H <- H + trial(  "draw"             , Ewue_vs_Keres, KerW_draws_Euw_NMF)
+
+#MF
+H <- H + trial(c("Ewue"  ,"white","MF"), Ewue_vs_Keres, EuwW_beats_Ker_MF)
+H <- H + trial(c("Keres","white","MF"), Ewue_vs_Keres, KerW_beats_Euw_MF)
+H <- H + trial(  c("Keres","MF")           , Ewue_vs_Keres, EuwW_lostTo_Ker_MF)
+H <- H + trial(  c("Ewue","MF")           , Ewue_vs_Keres, KerW_lostTo_Euw_MF)
+H <- H + trial(  c("draw","MF")            , Ewue_vs_Keres, EuwW_draws_Ker_MF)
+H <- H + trial(  c("draw","MF")            , Ewue_vs_Keres, KerW_draws_Euw_MF)
+
+#Smyslov VS Reshevsky
+Smyslov_vs_Reshevsky <- c("Smyslov","Reshevsky","white","draw","MF")  # all "players", real and imaginary
+
+#No MF
+H <- H + trial(c("Smyslov"  ,"white"), Smyslov_vs_Reshevsky, SmyW_beats_Res_NMF)
+H <- H + trial(c("Reshevsky","white"), Smyslov_vs_Reshevsky, ResW_beats_Smy_NMF)
+H <- H + trial(  "Reshevsky"           , Smyslov_vs_Reshevsky, SmyW_lostTo_Res_NMF)
+H <- H + trial(  "Smyslov"           , Smyslov_vs_Reshevsky, ResW_lostTo_Smy_NMF)
+H <- H + trial(  "draw"              , Smyslov_vs_Reshevsky, SmyW_draws_Res_NMF)
+H <- H + trial(  "draw"              , Smyslov_vs_Reshevsky, ResW_draws_Smy_NMF)
+
+#MF
+H <- H + trial(c("Smyslov"  ,"white","MF"), Smyslov_vs_Reshevsky, SmyW_beats_Res_MF)
+H <- H + trial(c("Reshevsky","white","MF") , Smyslov_vs_Reshevsky, ResW_beats_Smy_MF)
+H <- H + trial(  c("Reshevsky","MF")           , Smyslov_vs_Reshevsky, SmyW_lostTo_Res_MF)
+H <- H + trial(  c("Smyslov","MF")           , Smyslov_vs_Reshevsky, ResW_lostTo_Smy_MF)
+H <- H + trial(  c("draw","MF")            , Smyslov_vs_Reshevsky, SmyW_draws_Res_MF)
+H <- H + trial(  c("draw","MF")            , Smyslov_vs_Reshevsky, ResW_draws_Smy_MF)
+
+#Botvinnik VS Euwe
+Botvinnik_vs_Euwe <- c("Botvinnik","Euwe","white","draw","MF")  # all "players", real and imaginary
+
+#No MF
+H <- H + trial(c("Botvinnik"  ,"white"), Botvinnik_vs_Euwe, BotW_beats_Euw_NMF)
+H <- H + trial(c("Euwe","white"), Botvinnik_vs_Euwe, EuwW_beats_Bot_NMF)
+H <- H + trial(  "Euwe"           , Botvinnik_vs_Euwe, BotW_lostTo_Euw_NMF)
+H <- H + trial(  "Botvinnik"           , Botvinnik_vs_Euwe, EuwW_lostTo_Bot_NMF)
+H <- H + trial(  "draw"              , Botvinnik_vs_Euwe, EuwW_draws_Bot_NMF)
+H <- H + trial(  "draw"              , Botvinnik_vs_Euwe, BotW_draws_Euw_NMF)
+
+#MF
+H <- H + trial(c("Botvinnik"  ,"white","MF"), Botvinnik_vs_Euwe, BotW_beats_Euw_MF)
+H <- H + trial(c("Euwe","white","MF") , Botvinnik_vs_Euwe, EuwW_beats_Bot_MF)
+H <- H + trial(  c("Euwe","MF")           , Botvinnik_vs_Euwe, BotW_lostTo_Euw_MF)
+H <- H + trial(  c("Botvinnik","MF")           , Botvinnik_vs_Euwe, EuwW_lostTo_Bot_MF)
+H <- H + trial(  c("draw","MF")            , Botvinnik_vs_Euwe, EuwW_draws_Bot_MF)
+H <- H + trial(  c("draw","MF")            , Botvinnik_vs_Euwe, BotW_draws_Euw_MF)
+#=========================================================================================================
+#=========================================================================================================
+#Ewue VS Reshevsky
+Ewue_vs_Reshevsky <- c("Ewue","Reshevsky","white","draw","MF")  # all "players", real and imaginary
+
+#No MF
+H <- H + trial(c("Ewue"  ,"white"), Ewue_vs_Reshevsky, EuwW_beats_Res_NMF)
+H <- H + trial(c("Reshevsky","white"), Ewue_vs_Reshevsky, ResW_beats_Euw_NMF)
+H <- H + trial(  "Reshevsky"           , Ewue_vs_Reshevsky, EuwW_lostTo_Res_NMF)
+H <- H + trial(  "Ewue"           , Ewue_vs_Reshevsky, ResW_lostTo_Euw_NMF)
+H <- H + trial(  "draw"             , Ewue_vs_Reshevsky, EuwW_draws_Res_NMF)
+H <- H + trial(  "draw"             , Ewue_vs_Reshevsky, ResW_draws_Euw_NMF)
+
+#MF
+H <- H + trial(c("Ewue"  ,"white","MF"), Ewue_vs_Reshevsky, EuwW_beats_Res_MF)
+H <- H + trial(c("Reshevsky","white","MF"), Ewue_vs_Reshevsky, ResW_beats_Euw_MF)
+H <- H + trial(  c("Reshevsky","MF")           , Ewue_vs_Reshevsky, EuwW_lostTo_Res_MF)
+H <- H + trial(  c("Ewue","MF")           , Ewue_vs_Reshevsky, ResW_lostTo_Euw_MF)
+H <- H + trial(  c("draw","MF")            , Ewue_vs_Reshevsky, EuwW_draws_Res_MF)
+H <- H + trial(  c("draw","MF")            , Ewue_vs_Reshevsky, ResW_draws_Euw_MF)
+
+#Smyslov VS Keres
+Smyslov_vs_Keres <- c("Smyslov","Keres","white","draw","MF")  # all "players", real and imaginary
+
+#No MF
+H <- H + trial(c("Smyslov"  ,"white"), Smyslov_vs_Keres, SmyW_beats_Ker_NMF)
+H <- H + trial(c("Keres","white"), Smyslov_vs_Keres, KerW_beats_Smy_NMF)
+H <- H + trial(  "Keres"           , Smyslov_vs_Keres, SmyW_lostTo_Ker_NMF)
+H <- H + trial(  "Smyslov"           , Smyslov_vs_Keres, KerW_lostTo_Smy_NMF)
+H <- H + trial(  "draw"              , Smyslov_vs_Keres, SmyW_draws_Ker_NMF)
+H <- H + trial(  "draw"              , Smyslov_vs_Keres, KerW_draws_Smy_NMF)
+
+#MF
+H <- H + trial(c("Smyslov"  ,"white","MF"), Smyslov_vs_Keres, SmyW_beats_Ker_MF)
+H <- H + trial(c("Keres","white","MF") , Smyslov_vs_Keres, KerW_beats_Smy_MF)
+H <- H + trial(  c("Keres","MF")           , Smyslov_vs_Keres, SmyW_lostTo_Ker_MF)
+H <- H + trial(  c("Smyslov","MF")           , Smyslov_vs_Keres, KerW_lostTo_Smy_MF)
+H <- H + trial(  c("draw","MF")            , Smyslov_vs_Keres, SmyW_draws_Ker_MF)
+H <- H + trial(  c("draw","MF")            , Smyslov_vs_Keres, KerW_draws_Smy_MF)
+
+#Botvinnik VS Smyslov
+Botvinnik_vs_Smyslov <- c("Botvinnik","Smyslov","white","draw","MF")  # all "players", real and imaginary
+
+#No MF
+H <- H + trial(c("Botvinnik"  ,"white"), Botvinnik_vs_Smyslov, BotW_beats_Smy_NMF)
+H <- H + trial(c("Smyslov","white"), Botvinnik_vs_Smyslov, SmyW_beats_Bot_NMF)
+H <- H + trial(  "Smyslov"           , Botvinnik_vs_Smyslov, BotW_lostTo_Smy_NMF)
+H <- H + trial(  "Botvinnik"           , Botvinnik_vs_Smyslov, SmyW_lostTo_Bot_NMF)
+H <- H + trial(  "draw"              , Botvinnik_vs_Smyslov, SmyW_draws_Bot_NMF)
+H <- H + trial(  "draw"              , Botvinnik_vs_Smyslov, BotW_draws_Smy_NMF)
+
+#MF
+H <- H + trial(c("Botvinnik"  ,"white","MF"), Botvinnik_vs_Smyslov, BotW_beats_Smy_MF)
+H <- H + trial(c("Smyslov","white","MF") , Botvinnik_vs_Smyslov, SmyW_beats_Bot_MF)
+H <- H + trial(  c("Smyslov","MF")           , Botvinnik_vs_Smyslov, BotW_lostTo_Smy_MF)
+H <- H + trial(  c("Botvinnik","MF")           , Botvinnik_vs_Smyslov, SmyW_lostTo_Bot_MF)
+H <- H + trial(  c("draw","MF")            , Botvinnik_vs_Smyslov, SmyW_draws_Bot_MF)
+H <- H + trial(  c("draw","MF")            , Botvinnik_vs_Smyslov, BotW_draws_Smy_MF)
+#=========================================================================================================
+#=========================================================================================================
+#Ewue VS Smyslov
+Ewue_vs_Smyslov <- c("Ewue","Smyslov","white","draw","MF")  # all "players", real and imaginary
+
+#No MF
+H <- H + trial(c("Ewue"  ,"white"), Ewue_vs_Smyslov, EuwW_beats_Smy_NMF)
+H <- H + trial(c("Smyslov","white"), Ewue_vs_Smyslov, SmyW_beats_Euw_NMF)
+H <- H + trial(  "Smyslov"           , Ewue_vs_Smyslov, EuwW_lostTo_Smy_NMF)
+H <- H + trial(  "Ewue"           , Ewue_vs_Smyslov, SmyW_lostTo_Euw_NMF)
+H <- H + trial(  "draw"             , Ewue_vs_Smyslov, EuwW_draws_Smy_NMF)
+H <- H + trial(  "draw"             , Ewue_vs_Smyslov, SmyW_draws_Euw_NMF)
+
+#MF
+H <- H + trial(c("Ewue"  ,"white","MF"), Ewue_vs_Smyslov, EuwW_beats_Smy_MF)
+H <- H + trial(c("Smyslov","white","MF"), Ewue_vs_Smyslov, SmyW_beats_Euw_MF)
+H <- H + trial(  c("Smyslov","MF")           , Ewue_vs_Smyslov, EuwW_lostTo_Smy_MF)
+H <- H + trial(  c("Ewue","MF")           , Ewue_vs_Smyslov, SmyW_lostTo_Euw_MF)
+H <- H + trial(  c("draw","MF")            , Ewue_vs_Smyslov, EuwW_draws_Smy_MF)
+H <- H + trial(  c("draw","MF")            , Ewue_vs_Smyslov, SmyW_draws_Euw_MF)
+
+#Reshevsky VS Botvinnik
+Reshevsky_vs_Botvinnik <- c("Reshevsky","Botvinnik","white","draw","MF")  # all "players", real and imaginary
+
+#No MF
+H <- H + trial(c("Reshevsky"  ,"white"), Reshevsky_vs_Botvinnik, ResW_beats_Bot_NMF)
+H <- H + trial(c("Botvinnik","white"), Reshevsky_vs_Botvinnik, BotW_beats_Res_NMF)
+H <- H + trial(  "Botvinnik"           , Reshevsky_vs_Botvinnik, ResW_lostTo_Bot_NMF)
+H <- H + trial(  "Reshevsky"           , Reshevsky_vs_Botvinnik, BotW_lostTo_Res_NMF)
+H <- H + trial(  "draw"              , Reshevsky_vs_Botvinnik, ResW_draws_Bot_NMF)
+H <- H + trial(  "draw"              , Reshevsky_vs_Botvinnik, BotW_draws_Res_NMF)
+
+#MF
+H <- H + trial(c("Reshevsky"  ,"white","MF"), Reshevsky_vs_Botvinnik, ResW_beats_Bot_MF)
+H <- H + trial(c("Botvinnik","white","MF") , Reshevsky_vs_Botvinnik, BotW_beats_Res_MF)
+H <- H + trial(  c("Botvinnik","MF")           , Reshevsky_vs_Botvinnik, ResW_lostTo_Bot_MF)
+H <- H + trial(  c("Reshevsky","MF")           , Reshevsky_vs_Botvinnik, BotW_lostTo_Res_MF)
+H <- H + trial(  c("draw","MF")            , Reshevsky_vs_Botvinnik, ResW_draws_Bot_MF)
+H <- H + trial(  c("draw","MF")            , Reshevsky_vs_Botvinnik, BotW_draws_Res_MF)
+
+#Botvinnik VS Keres
+Botvinnik_vs_Keres <- c("Botvinnik","Keres","white","draw","MF")  # all "players", real and imaginary
+
+#No MF
+H <- H + trial(c("Botvinnik"  ,"white"), Botvinnik_vs_Keres, BotW_beats_Ker_NMF)
+H <- H + trial(c("Keres","white"), Botvinnik_vs_Keres, KerW_beats_Bot_NMF)
+H <- H + trial(  "Keres"           , Botvinnik_vs_Keres, BotW_lostTo_Ker_NMF)
+H <- H + trial(  "Botvinnik"           , Botvinnik_vs_Keres, KerW_lostTo_Bot_NMF)
+H <- H + trial(  "draw"              , Botvinnik_vs_Keres, KerW_draws_Bot_NMF)
+H <- H + trial(  "draw"              , Botvinnik_vs_Keres, BotW_draws_Ker_NMF)
+
+#MF
+H <- H + trial(c("Botvinnik"  ,"white","MF"), Botvinnik_vs_Keres, BotW_beats_Ker_MF)
+H <- H + trial(c("Keres","white","MF") , Botvinnik_vs_Keres, KerW_beats_Bot_MF)
+H <- H + trial(  c("Keres","MF")           , Botvinnik_vs_Keres, BotW_lostTo_Ker_MF)
+H <- H + trial(  c("Botvinnik","MF")           , Botvinnik_vs_Keres, KerW_lostTo_Bot_MF)
+H <- H + trial(  c("draw","MF")            , Botvinnik_vs_Keres, KerW_draws_Bot_MF)
+H <- H + trial(  c("draw","MF")            , Botvinnik_vs_Keres, BotW_draws_Ker_MF)
+
+
+#Reshevsky VS Keres
+Reshevsky_vs_Keres <- c("Reshevsky","Keres","white","draw","MF")  # all "players", real and imaginary
+
+#No MF
+H <- H + trial(c("Reshevsky"  ,"white"), Reshevsky_vs_Keres, ResW_beats_Ker_NMF)
+H <- H + trial(c("Keres","white"), Reshevsky_vs_Keres, KerW_beats_Res_NMF)
+H <- H + trial(  "Keres"           , Reshevsky_vs_Keres, ResW_lostTo_Ker_NMF)
+H <- H + trial(  "Reshevsky"           , Reshevsky_vs_Keres, KerW_lostTo_Res_NMF)
+H <- H + trial(  "draw"              , Reshevsky_vs_Keres, ResW_draws_Ker_NMF)
+H <- H + trial(  "draw"              , Reshevsky_vs_Keres, KerW_draws_Res_NMF)
+
+#MF
+H <- H + trial(c("Reshevsky"  ,"white","MF"), Reshevsky_vs_Keres, ResW_beats_Ker_MF)
+H <- H + trial(c("Keres","white","MF") , Reshevsky_vs_Keres, KerW_beats_Res_MF)
+H <- H + trial(  c("Keres","MF")           , Reshevsky_vs_Keres, ResW_lostTo_Ker_MF)
+H <- H + trial(  c("Reshevsky","MF")           , Reshevsky_vs_Keres, KerW_lostTo_Res_MF)
+H <- H + trial(  c("draw","MF")            , Reshevsky_vs_Keres, ResW_draws_Ker_MF)
+H <- H + trial(  c("draw","MF")            , Reshevsky_vs_Keres, KerW_draws_Res_MF)
+
+detach(results)
+
+Hyper_fide1948 <- H
+Hyper_fide1948
+(Hyper_fide1948_maxp <- maxp(Hyper_fide1948))
+
+```
+
+
+```{r}
+sum(Hyper_fide1948_maxp)
+
+names <- names(Hyper_fide1948_maxp)
+results1948_df <- data.frame(Entity = names, Ranking = unique(Hyper_fide1948_maxp))
+results1948_df
+
+library(ggplot2)
+ggplot(results1948_df, aes(Ranking,Entity))+ geom_point() + labs(title = "1948 World Championship ranking (w.r.t Mental Fatigue)")
+```
+
+##Hypothesis Testing
+
+$H_0 : p_1 =... = p_n$
+
+$H_1 : p_1 \neq... \neq p_n$
+
+```{r}
+test <- equalp.test(H)
+test
+```
+
+The results above show a p-value = `r test$p.value` which is lower than a significance level of 0.05. This suggests that all the entities have different strengths.

@@ -1,0 +1,1005 @@
+---
+title: "ChessMF"
+author: "Toetu"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+Here, I am analyzing the effects of Mental Fatigue (MF) on expert chess players during a game of chess. The data sets that we will be analyzing are the 1948 FIDE world chess championship, and the 2022 candidates games. We will be using the 'Hyper2' package developed by Dr. Hankin. 
+
+```{r}
+library(hyper2)
+library(readxl)
+
+#Data
+Fide2022 <- read_excel("~/Academic Life/Master of Analytics/ENGE817 STEM Research paper/Fide2022.xlsx")
+View(Fide2022)
+
+#We have 5 players that played 50 games all together
+#How many possible games of 2 can occur for 5 players?
+factorial(8)/(factorial(8 - 2)*factorial(2))
+
+```
+
+#Hyper2 object
+```{r}
+fide22 <- c(
+ #Nepo VS Ding 
+  NepW_lostTo_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NepW_beats_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NepW_draws_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  DinW_lostTo_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DinW_beats_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DinW_draws_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  NepW_lostTo_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NepW_beats_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NepW_draws_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  DinW_lostTo_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DinW_beats_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DinW_draws_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  
+ #Nepo VS Radjabov 
+  NepW_lostTo_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NepW_beats_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NepW_draws_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  RadW_lostTo_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RadW_beats_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RadW_draws_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  NepW_lostTo_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NepW_beats_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NepW_draws_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  RadW_lostTo_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RadW_beats_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RadW_draws_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Nepo VS Nakamura 
+  NepW_lostTo_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NepW_beats_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NepW_draws_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  NakW_lostTo_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NakW_beats_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NakW_draws_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  NepW_lostTo_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NepW_beats_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NepW_draws_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  NakW_lostTo_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NakW_beats_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NakW_draws_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Nepo VS Caruana 
+  NepW_lostTo_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NepW_beats_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NepW_draws_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  CarW_lostTo_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  CarW_beats_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  CarW_draws_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  NepW_lostTo_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NepW_beats_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NepW_draws_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  CarW_lostTo_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  CarW_beats_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  CarW_draws_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Nepo VS Firouzja 
+  NepW_lostTo_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NepW_beats_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NepW_draws_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  FirW_lostTo_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  FirW_beats_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  FirW_draws_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  NepW_lostTo_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NepW_beats_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NepW_draws_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  FirW_lostTo_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  FirW_beats_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  FirW_draws_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Nepo VS Duda
+  NepW_lostTo_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NepW_beats_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NepW_draws_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  DudW_lostTo_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DudW_beats_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DudW_draws_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  NepW_lostTo_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NepW_beats_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NepW_draws_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  DudW_lostTo_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DudW_beats_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DudW_draws_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Nepo VS Rapport
+  NepW_lostTo_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NepW_beats_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NepW_draws_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  RapW_lostTo_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RapW_beats_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RapW_draws_Nep_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  NepW_lostTo_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NepW_beats_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NepW_draws_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nepo" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  RapW_lostTo_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RapW_beats_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RapW_draws_Nep_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Nepo" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ 
+ #Ding VS Radjabov
+  DinW_lostTo_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DinW_beats_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DinW_draws_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  RadW_lostTo_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RadW_beats_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RadW_draws_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  DinW_lostTo_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DinW_beats_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DinW_draws_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  RadW_lostTo_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RadW_beats_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RadW_draws_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Ding VS Nakamura
+  DinW_lostTo_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DinW_beats_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DinW_draws_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  NakW_lostTo_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NakW_beats_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NakW_draws_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  DinW_lostTo_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DinW_beats_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DinW_draws_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  NakW_lostTo_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NakW_beats_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NakW_draws_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Ding VS Caruana
+  DinW_lostTo_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DinW_beats_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DinW_draws_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  CarW_lostTo_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  CarW_beats_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  CarW_draws_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  DinW_lostTo_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DinW_beats_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DinW_draws_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  CarW_lostTo_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  CarW_beats_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  CarW_draws_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Ding VS Firouzja
+  DinW_lostTo_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DinW_beats_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DinW_draws_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  FirW_lostTo_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  FirW_beats_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  FirW_draws_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  DinW_lostTo_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DinW_beats_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DinW_draws_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  FirW_lostTo_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  FirW_beats_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  FirW_draws_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Ding VS Duda
+  DinW_lostTo_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DinW_beats_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DinW_draws_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  DudW_lostTo_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DudW_beats_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DudW_draws_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  DinW_lostTo_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DinW_beats_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DinW_draws_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  DudW_lostTo_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DudW_beats_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DudW_draws_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Ding VS Rapport
+  DinW_lostTo_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DinW_beats_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DinW_draws_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  RapW_lostTo_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RapW_beats_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RapW_draws_Din_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  DinW_lostTo_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DinW_beats_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DinW_draws_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Ding" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  RapW_lostTo_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RapW_beats_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RapW_draws_Din_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Ding" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Radjabov VS Nakamura
+  RadW_lostTo_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RadW_beats_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RadW_draws_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  NakW_lostTo_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NakW_beats_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NakW_draws_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  RadW_lostTo_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RadW_beats_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RadW_draws_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  NakW_lostTo_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NakW_beats_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NakW_draws_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Radjabov VS Caruana
+  RadW_lostTo_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RadW_beats_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RadW_draws_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  CarW_lostTo_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  CarW_beats_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  CarW_draws_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  RadW_lostTo_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RadW_beats_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RadW_draws_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  CarW_lostTo_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  CarW_beats_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  CarW_draws_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Radjabov VS Firouzja
+  RadW_lostTo_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RadW_beats_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RadW_draws_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  FirW_lostTo_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  FirW_beats_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  FirW_draws_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  RadW_lostTo_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RadW_beats_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RadW_draws_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  FirW_lostTo_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  FirW_beats_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  FirW_draws_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Radjabov VS Duda
+  RadW_lostTo_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RadW_beats_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RadW_draws_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  DudW_lostTo_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DudW_beats_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DudW_draws_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  RadW_lostTo_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RadW_beats_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RadW_draws_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  DudW_lostTo_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DudW_beats_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DudW_draws_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Radjabov VS Rapport
+  RadW_lostTo_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RadW_beats_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RadW_draws_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  RapW_lostTo_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RapW_beats_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RapW_draws_Rad_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  RadW_lostTo_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RadW_beats_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RadW_draws_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Radjabov" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  RapW_lostTo_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RapW_beats_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RapW_draws_Rad_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Radjabov" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Nakamura VS Caruana
+  NakW_lostTo_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NakW_beats_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NakW_draws_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  CarW_lostTo_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  CarW_beats_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  CarW_draws_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  NakW_lostTo_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NakW_beats_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NakW_draws_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  CarW_lostTo_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  CarW_beats_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  CarW_draws_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ 
+ #Nakamura VS Firouzja
+  NakW_lostTo_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NakW_beats_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NakW_draws_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  FirW_lostTo_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  FirW_beats_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  FirW_draws_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  NakW_lostTo_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NakW_beats_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NakW_draws_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  FirW_lostTo_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  FirW_beats_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  FirW_draws_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Nakamura VS Duda
+  NakW_lostTo_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NakW_beats_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NakW_draws_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  DudW_lostTo_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DudW_beats_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DudW_draws_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  NakW_lostTo_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NakW_beats_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NakW_draws_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  DudW_lostTo_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DudW_beats_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DudW_draws_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Nakamura VS Rapport
+  NakW_lostTo_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  NakW_beats_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  NakW_draws_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  RapW_lostTo_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RapW_beats_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RapW_draws_Nak_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  NakW_lostTo_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  NakW_beats_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  NakW_draws_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Nakamura" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  RapW_lostTo_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RapW_beats_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RapW_draws_Nak_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Nakamura" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Caruana VS Firouzja
+  CarW_lostTo_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  CarW_beats_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  CarW_draws_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  FirW_lostTo_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  FirW_beats_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  FirW_draws_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  CarW_lostTo_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  CarW_beats_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  CarW_draws_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  FirW_lostTo_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  FirW_beats_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  FirW_draws_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Caruana VS Duda
+  CarW_lostTo_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  CarW_beats_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  CarW_draws_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  FirW_lostTo_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  FirW_beats_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  FirW_draws_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  CarW_lostTo_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  CarW_beats_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  CarW_draws_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  FirW_lostTo_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  FirW_beats_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  FirW_draws_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Caruana VS Rapport
+  CarW_lostTo_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  CarW_beats_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  CarW_draws_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  RapW_lostTo_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RapW_beats_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RapW_draws_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  CarW_lostTo_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  CarW_beats_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  CarW_draws_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  RapW_lostTo_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RapW_beats_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RapW_draws_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Firouzja VS Duda
+  FirW_lostTo_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  FirW_beats_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  FirW_draws_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  DudW_lostTo_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DudW_beats_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DudW_draws_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  FirW_lostTo_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  FirW_beats_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  FirW_draws_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  DudW_lostTo_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DudW_beats_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DudW_draws_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Firouzja VS Rapport
+  FirW_lostTo_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  FirW_beats_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  FirW_draws_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  RapW_lostTo_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RapW_beats_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RapW_draws_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  FirW_lostTo_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  FirW_beats_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  FirW_draws_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  RapW_lostTo_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RapW_beats_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RapW_draws_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Firouzja" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+ 
+ #Duda VS Rapport
+  DudW_lostTo_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DudW_beats_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DudW_draws_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  RapW_lostTo_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  RapW_beats_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  RapW_draws_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  
+  DudW_lostTo_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DudW_beats_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DudW_draws_Rap_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  RapW_lostTo_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  RapW_beats_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  RapW_draws_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Rapport" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1]
+)
+
+
+
+```
+
+
+
+**Hyper 2 object**
+```{r}
+results <- as.list(fide22)
+attach(results)
+H <- hyper2()
+
+#Nepo VS Ding 
+Nepo_vs_Ding <- c("Nepo","Ding","white","draw","MF")  # all "players", real and imaginary
+
+#No MF
+H <- H + trial(c("Nepo"  ,"white"), Nepo_vs_Ding, NepW_beats_Din_NMF)
+H <- H + trial(c("Ding","white"), Nepo_vs_Ding, DinW_beats_Nep_NMF)
+H <- H + trial(  "Ding"           , Nepo_vs_Ding, NepW_lostTo_Din_NMF)
+H <- H + trial(  "Nepo"           , Nepo_vs_Ding, DinW_lostTo_Nep_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Ding, NepW_draws_Din_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Ding, DinW_draws_Nep_NMF)
+
+#MF
+H <- H + trial(c("Nepo"  ,"white","MF"), Nepo_vs_Ding, NepW_beats_Din_MF)
+H <- H + trial(c("Ding","white","MF"), Nepo_vs_Ding, DinW_beats_Nep_MF)
+H <- H + trial(  c("Ding","MF")           , Nepo_vs_Ding, NepW_lostTo_Din_MF)
+H <- H + trial(  c("Nepo","MF")           , Nepo_vs_Ding, DinW_lostTo_Nep_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Ding, NepW_draws_Din_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Ding, DinW_draws_Nep_MF)
+
+#Nepo VS Radjabov 
+Nepo_vs_Radjabov <- c("Nepo","Radjabov","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Nepo"  ,"white"), Nepo_vs_Radjabov, NepW_beats_Rad_NMF)
+H <- H + trial(c("Radjabov","white"), Nepo_vs_Radjabov, RadW_beats_Nep_NMF)
+H <- H + trial(  "Radjabov"           , Nepo_vs_Radjabov, NepW_lostTo_Rad_NMF)
+H <- H + trial(  "Nepo"           , Nepo_vs_Radjabov, RadW_lostTo_Nep_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Radjabov, NepW_draws_Rad_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Radjabov, RadW_draws_Nep_NMF)
+
+#MF
+H <- H + trial(c("Nepo"  ,"white","MF"), Nepo_vs_Radjabov, NepW_beats_Rad_MF)
+H <- H + trial(c("Radjabov","white","MF"), Nepo_vs_Radjabov, RadW_beats_Nep_MF)
+H <- H + trial(  c("Radjabov","MF")           , Nepo_vs_Radjabov, NepW_lostTo_Rad_MF)
+H <- H + trial(  c("Nepo","MF")           , Nepo_vs_Radjabov, RadW_lostTo_Nep_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Radjabov, NepW_draws_Rad_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Radjabov, RadW_draws_Nep_MF)
+
+#Nepo VS Nakamura
+Nepo_vs_Nakamura <- c("Nepo","Nakamura","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Nepo"  ,"white"), Nepo_vs_Nakamura, NepW_beats_Nak_NMF)
+H <- H + trial(c("Nakamura","white"), Nepo_vs_Nakamura, NakW_beats_Nep_NMF)
+H <- H + trial(  "Nakamura"           , Nepo_vs_Nakamura, NepW_lostTo_Nak_NMF)
+H <- H + trial(  "Nepo"           , Nepo_vs_Nakamura, NakW_lostTo_Nep_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Nakamura, NepW_draws_Nak_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Nakamura, NakW_draws_Nep_NMF)
+
+#MF
+H <- H + trial(c("Nepo"  ,"white","MF"), Nepo_vs_Nakamura, NepW_beats_Nak_MF)
+H <- H + trial(c("Nakamura","white","MF"), Nepo_vs_Nakamura, NakW_beats_Nep_MF)
+H <- H + trial(  c("Nakamura","MF")           , Nepo_vs_Nakamura, NepW_lostTo_Nak_MF)
+H <- H + trial(  c("Nepo","MF")           , Nepo_vs_Nakamura, NakW_lostTo_Nep_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Nakamura, NepW_draws_Nak_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Nakamura, NakW_draws_Nep_MF)
+
+#Nepo VS Caruana 
+Nepo_vs_Caruana <- c("Nepo","Caruana","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Nepo"  ,"white"), Nepo_vs_Caruana, NepW_beats_Car_NMF)
+H <- H + trial(c("Caruana","white"), Nepo_vs_Caruana, CarW_beats_Nep_NMF)
+H <- H + trial(  "Caruana"           , Nepo_vs_Caruana, NepW_lostTo_Car_NMF)
+H <- H + trial(  "Nepo"           , Nepo_vs_Caruana, CarW_lostTo_Nep_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Caruana, NepW_draws_Car_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Caruana, CarW_draws_Nep_NMF)
+
+#MF
+H <- H + trial(c("Nepo"  ,"white","MF"), Nepo_vs_Caruana, NepW_beats_Car_MF)
+H <- H + trial(c("Caruana","white","MF"), Nepo_vs_Caruana, CarW_beats_Nep_MF)
+H <- H + trial(  c("Caruana","MF")           , Nepo_vs_Caruana, NepW_lostTo_Car_MF)
+H <- H + trial(  c("Nepo","MF")           , Nepo_vs_Caruana, CarW_lostTo_Nep_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Caruana, NepW_draws_Car_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Caruana, CarW_draws_Nep_MF)
+
+#Nepo VS Firouzja 
+Nepo_vs_Firouzja <- c("Nepo","Firouzja","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Nepo"  ,"white"), Nepo_vs_Firouzja, NepW_beats_Fir_NMF)
+H <- H + trial(c("Firouzja","white"), Nepo_vs_Firouzja, FirW_beats_Nep_NMF)
+H <- H + trial(  "Firouzja"           , Nepo_vs_Firouzja, NepW_lostTo_Fir_NMF)
+H <- H + trial(  "Nepo"           , Nepo_vs_Firouzja, FirW_lostTo_Nep_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Firouzja, NepW_draws_Fir_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Firouzja, FirW_draws_Nep_NMF)
+
+#MF
+H <- H + trial(c("Nepo"  ,"white","MF"), Nepo_vs_Firouzja, NepW_beats_Fir_MF)
+H <- H + trial(c("Firouzja","white","MF"), Nepo_vs_Firouzja, FirW_beats_Nep_MF)
+H <- H + trial(  c("Firouzja","MF")           , Nepo_vs_Firouzja, NepW_lostTo_Fir_MF)
+H <- H + trial(  c("Nepo","MF")           , Nepo_vs_Firouzja, FirW_lostTo_Nep_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Firouzja, NepW_draws_Fir_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Firouzja, FirW_draws_Nep_MF)
+
+#Nepo VS Duda 
+Nepo_vs_Firouzja <- c("Nepo","Duda","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Nepo"  ,"white"), Nepo_vs_Firouzja, NepW_beats_Dud_NMF)
+H <- H + trial(c("Duda","white"), Nepo_vs_Firouzja, DudW_beats_Nep_NMF)
+H <- H + trial(  "Duda"           , Nepo_vs_Firouzja, NepW_lostTo_Dud_NMF)
+H <- H + trial(  "Nepo"           , Nepo_vs_Firouzja, DudW_lostTo_Nep_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Firouzja, NepW_draws_Dud_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Firouzja, DudW_draws_Nep_NMF)
+
+#MF
+H <- H + trial(c("Nepo"  ,"white","MF"), Nepo_vs_Firouzja, NepW_beats_Dud_MF)
+H <- H + trial(c("Duda","white","MF"), Nepo_vs_Firouzja, DudW_beats_Nep_MF)
+H <- H + trial(  c("Duda","MF")           , Nepo_vs_Firouzja, NepW_lostTo_Dud_MF)
+H <- H + trial(  c("Nepo","MF")           , Nepo_vs_Firouzja, DudW_lostTo_Nep_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Firouzja, NepW_draws_Dud_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Firouzja, DudW_draws_Nep_MF)
+
+#Nepo VS Rapport 
+Nepo_vs_Rapport <- c("Nepo","Rapport","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Nepo"  ,"white"), Nepo_vs_Rapport, NepW_beats_Rap_NMF)
+H <- H + trial(c("Rapport","white"), Nepo_vs_Rapport, RapW_beats_Nep_NMF)
+H <- H + trial(  "Rapport"           , Nepo_vs_Rapport, NepW_lostTo_Rap_NMF)
+H <- H + trial(  "Nepo"           , Nepo_vs_Rapport, RapW_lostTo_Nep_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Rapport, NepW_draws_Rap_NMF)
+H <- H + trial(  "draw"             , Nepo_vs_Rapport, RapW_draws_Nep_NMF)
+
+#MF
+H <- H + trial(c("Nepo"  ,"white","MF"), Nepo_vs_Rapport, NepW_beats_Rap_MF)
+H <- H + trial(c("Rapport","white","MF"), Nepo_vs_Rapport, RapW_beats_Nep_MF)
+H <- H + trial(  c("Rapport","MF")           , Nepo_vs_Rapport, NepW_lostTo_Rap_MF)
+H <- H + trial(  c("Nepo","MF")           , Nepo_vs_Rapport, RapW_lostTo_Nep_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Rapport, NepW_draws_Rap_MF)
+H <- H + trial(  c("draw","MF")            , Nepo_vs_Rapport, RapW_draws_Nep_MF)
+
+#Ding VS Radjabov
+Ding_vs_Radjabov <- c("Ding","Radjabov","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Ding"  ,"white"), Ding_vs_Radjabov, DinW_beats_Rad_NMF)
+H <- H + trial(c("Radjabov","white"), Ding_vs_Radjabov, RadW_beats_Din_NMF)
+H <- H + trial(  "Radjabov"           , Ding_vs_Radjabov, DinW_lostTo_Rad_NMF)
+H <- H + trial(  "Ding"           , Ding_vs_Radjabov, RadW_lostTo_Din_NMF)
+H <- H + trial(  "draw"             , Ding_vs_Radjabov, DinW_draws_Rad_NMF)
+H <- H + trial(  "draw"             , Ding_vs_Radjabov, RapW_draws_Din_NMF)
+
+#MF
+H <- H + trial(c("Ding"  ,"white","MF"), Ding_vs_Radjabov, DinW_beats_Rad_MF)
+H <- H + trial(c("Radjabov","white","MF"), Ding_vs_Radjabov, RadW_beats_Din_MF)
+H <- H + trial(  c("Radjabov","MF")           , Ding_vs_Radjabov, DinW_lostTo_Rad_MF)
+H <- H + trial(  c("Ding","MF")           , Ding_vs_Radjabov, RadW_lostTo_Din_MF)
+H <- H + trial(  c("draw","MF")            , Ding_vs_Radjabov, DinW_draws_Rad_MF)
+H <- H + trial(  c("draw","MF")            , Ding_vs_Radjabov, RadW_draws_Din_MF)
+
+#Ding VS Nakamura
+Ding_vs_Nakamura <- c("Ding","Nakamura","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Ding"  ,"white"), Ding_vs_Nakamura, DinW_beats_Nak_NMF)
+H <- H + trial(c("Nakamura","white"), Ding_vs_Nakamura, NakW_beats_Din_NMF)
+H <- H + trial(  "Nakamura"           , Ding_vs_Nakamura, DinW_lostTo_Nak_NMF)
+H <- H + trial(  "Ding"           , Ding_vs_Nakamura, NakW_lostTo_Din_NMF)
+H <- H + trial(  "draw"             , Ding_vs_Nakamura, DinW_draws_Nak_NMF)
+H <- H + trial(  "draw"             , Ding_vs_Nakamura, NakW_draws_Din_NMF)
+
+#MF
+H <- H + trial(c("Ding"  ,"white","MF"), Ding_vs_Nakamura, DinW_beats_Nak_MF)
+H <- H + trial(c("Nakamura","white","MF"), Ding_vs_Nakamura, NakW_beats_Din_MF)
+H <- H + trial(  c("Nakamura","MF")           , Ding_vs_Nakamura, DinW_lostTo_Nak_MF)
+H <- H + trial(  c("Ding","MF")           , Ding_vs_Nakamura, NakW_lostTo_Din_MF)
+H <- H + trial(  c("draw","MF")            , Ding_vs_Nakamura, DinW_draws_Nak_MF)
+H <- H + trial(  c("draw","MF")            , Ding_vs_Nakamura, RadW_draws_Din_MF)
+
+#Ding VS Caruana
+Ding_vs_Caruana <- c("Ding","Caruana","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Ding"  ,"white"), Ding_vs_Caruana, DinW_beats_Car_NMF)
+H <- H + trial(c("Caruana","white"), Ding_vs_Caruana, CarW_beats_Din_NMF)
+H <- H + trial(  "Caruana"           , Ding_vs_Caruana, DinW_lostTo_Car_NMF)
+H <- H + trial(  "Ding"           , Ding_vs_Caruana, CarW_lostTo_Din_NMF)
+H <- H + trial(  "draw"             , Ding_vs_Caruana, DinW_draws_Car_NMF)
+H <- H + trial(  "draw"             , Ding_vs_Caruana, CarW_draws_Din_NMF)
+
+#MF
+H <- H + trial(c("Ding"  ,"white","MF"), Ding_vs_Caruana, DinW_beats_Car_MF)
+H <- H + trial(c("Caruana","white","MF"), Ding_vs_Caruana, CarW_beats_Din_MF)
+H <- H + trial(  c("Caruana","MF")           , Ding_vs_Caruana, DinW_lostTo_Car_MF)
+H <- H + trial(  c("Ding","MF")           , Ding_vs_Caruana, CarW_lostTo_Din_MF)
+H <- H + trial(  c("draw","MF")            , Ding_vs_Caruana, DinW_draws_Car_MF)
+H <- H + trial(  c("draw","MF")            , Ding_vs_Caruana, CarW_draws_Din_MF)
+
+#Ding VS Firouzja
+Ding_vs_Firouzja <- c("Ding","Firouzja","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Ding"  ,"white"), Ding_vs_Firouzja, DinW_beats_Fir_NMF)
+H <- H + trial(c("Firouzja","white"), Ding_vs_Firouzja, FirW_beats_Din_NMF)
+H <- H + trial(  "Firouzja"           , Ding_vs_Firouzja, DinW_lostTo_Fir_NMF)
+H <- H + trial(  "Ding"           , Ding_vs_Firouzja, FirW_lostTo_Din_NMF)
+H <- H + trial(  "draw"             , Ding_vs_Firouzja, DinW_draws_Fir_NMF)
+H <- H + trial(  "draw"             , Ding_vs_Firouzja, FirW_draws_Din_NMF)
+
+#MF
+H <- H + trial(c("Ding"  ,"white","MF"), Ding_vs_Firouzja, DinW_beats_Fir_MF)
+H <- H + trial(c("Firouzja","white","MF"), Ding_vs_Firouzja, FirW_beats_Din_MF)
+H <- H + trial(  c("Firouzja","MF")           , Ding_vs_Firouzja, DinW_lostTo_Fir_MF)
+H <- H + trial(  c("Ding","MF")           , Ding_vs_Firouzja, FirW_lostTo_Din_MF)
+H <- H + trial(  c("draw","MF")            , Ding_vs_Firouzja, DinW_draws_Fir_MF)
+H <- H + trial(  c("draw","MF")            , Ding_vs_Firouzja, FirW_draws_Din_MF)
+
+#Ding VS Duda
+Ding_vs_Duda <- c("Ding","Duda","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Ding"  ,"white"), Ding_vs_Duda, DinW_beats_Dud_NMF)
+H <- H + trial(c("Duda","white"), Ding_vs_Duda, DudW_beats_Din_NMF)
+H <- H + trial(  "Duda"           , Ding_vs_Duda, DinW_lostTo_Dud_NMF)
+H <- H + trial(  "Ding"           , Ding_vs_Duda, DudW_lostTo_Din_NMF)
+H <- H + trial(  "draw"             , Ding_vs_Duda, DinW_draws_Dud_NMF)
+H <- H + trial(  "draw"             , Ding_vs_Duda, DudW_draws_Din_NMF)
+
+#MF
+H <- H + trial(c("Ding"  ,"white","MF"), Ding_vs_Duda, DinW_beats_Dud_MF)
+H <- H + trial(c("Duda","white","MF"), Ding_vs_Duda, DudW_beats_Din_MF)
+H <- H + trial(  c("Duda","MF")           , Ding_vs_Duda, DinW_lostTo_Dud_MF)
+H <- H + trial(  c("Ding","MF")           , Ding_vs_Duda, DudW_lostTo_Din_MF)
+H <- H + trial(  c("draw","MF")            , Ding_vs_Duda, DinW_draws_Dud_MF)
+H <- H + trial(  c("draw","MF")            , Ding_vs_Duda, DudW_draws_Din_MF)
+
+#Ding VS Rapport
+Ding_vs_Rapport <- c("Ding","Rapport","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Ding"  ,"white"), Ding_vs_Rapport, DinW_beats_Rap_NMF)
+H <- H + trial(c("Rapport","white"), Ding_vs_Rapport, RapW_beats_Din_NMF)
+H <- H + trial(  "Rapport"           , Ding_vs_Rapport, DinW_lostTo_Rap_NMF)
+H <- H + trial(  "Ding"           , Ding_vs_Rapport, RapW_lostTo_Din_NMF)
+H <- H + trial(  "draw"             , Ding_vs_Rapport, DinW_draws_Rap_NMF)
+H <- H + trial(  "draw"             , Ding_vs_Rapport, RapW_draws_Din_NMF)
+
+#MF
+H <- H + trial(c("Ding"  ,"white","MF"), Ding_vs_Rapport, DinW_beats_Rap_MF)
+H <- H + trial(c("Rapport","white","MF"), Ding_vs_Rapport, RapW_beats_Din_MF)
+H <- H + trial(  c("Rapport","MF")           , Ding_vs_Rapport, DinW_lostTo_Rap_MF)
+H <- H + trial(  c("Ding","MF")           , Ding_vs_Rapport, RapW_lostTo_Din_MF)
+H <- H + trial(  c("draw","MF")            , Ding_vs_Rapport, DinW_draws_Rap_MF)
+H <- H + trial(  c("draw","MF")            , Ding_vs_Rapport, RapW_draws_Din_MF)
+
+
+#Radjabov VS Nakamura
+Radjabov_vs_Nakamura <- c("Radjabov","Nakamura","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Radjabov" ,"white"), Radjabov_vs_Nakamura, RadW_beats_Nak_NMF)
+H <- H + trial(c("Nakamura","white"), Radjabov_vs_Nakamura, NakW_beats_Rad_NMF)
+H <- H + trial(  "Nakamura"           , Radjabov_vs_Nakamura, RadW_lostTo_Nak_NMF)
+H <- H + trial(  "Radjabov"           , Radjabov_vs_Nakamura, NakW_lostTo_Rad_NMF)
+H <- H + trial(  "draw"             , Radjabov_vs_Nakamura, RadW_draws_Nak_NMF)
+H <- H + trial(  "draw"             , Radjabov_vs_Nakamura, NakW_draws_Rad_NMF)
+
+#MF
+H <- H + trial(c("Radjabov"  ,"white","MF"), Radjabov_vs_Nakamura, RadW_beats_Nak_MF)
+H <- H + trial(c("Nakamura","white","MF"), Radjabov_vs_Nakamura, NakW_beats_Rad_MF)
+H <- H + trial(  c("Nakamura","MF")           , Radjabov_vs_Nakamura, RadW_lostTo_Nak_MF)
+H <- H + trial(  c("Radjabov","MF")           , Radjabov_vs_Nakamura, NakW_lostTo_Rad_MF)
+H <- H + trial(  c("draw","MF")            , Radjabov_vs_Nakamura, RadW_draws_Nak_MF)
+H <- H + trial(  c("draw","MF")            , Radjabov_vs_Nakamura, NakW_draws_Rad_MF)
+
+#Radjabov VS Caruana
+Radjabov_vs_Caruana <- c("Radjabov","Caruana","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Radjabov"  ,"white"), Radjabov_vs_Caruana, RadW_beats_Nak_NMF)
+H <- H + trial(c("Caruana","white"), Radjabov_vs_Caruana, NakW_beats_Rad_NMF)
+H <- H + trial(  "Caruana"           , Radjabov_vs_Caruana, RadW_lostTo_Nak_NMF)
+H <- H + trial(  "Radjabov"           , Radjabov_vs_Caruana, NakW_lostTo_Rad_NMF)
+H <- H + trial(  "draw"             , Radjabov_vs_Caruana, RadW_draws_Nak_NMF)
+H <- H + trial(  "draw"             , Radjabov_vs_Caruana, NakW_draws_Rad_NMF)
+
+#MF
+H <- H + trial(c("Radjabov"  ,"white","MF"), Radjabov_vs_Caruana, RadW_beats_Car_MF)
+H <- H + trial(c("Caruana","white","MF"), Radjabov_vs_Caruana, CarW_beats_Rad_MF)
+H <- H + trial(  c("Caruana","MF")           , Radjabov_vs_Caruana, RadW_lostTo_Car_MF)
+H <- H + trial(  c("Radjabov","MF")           , Radjabov_vs_Caruana, CarW_lostTo_Rad_MF)
+H <- H + trial(  c("draw","MF")            , Radjabov_vs_Caruana, RadW_draws_Car_MF)
+H <- H + trial(  c("draw","MF")            , Radjabov_vs_Caruana, CarW_draws_Rad_MF)
+
+#Radjabov VS Firouzja
+Radjabov_vs_Firouzja <- c("Radjabov","Firouzja","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Radjabov"  ,"white"), Radjabov_vs_Firouzja, RadW_beats_Fir_NMF)
+H <- H + trial(c("Firouzja","white"), Radjabov_vs_Firouzja, FirW_beats_Rad_NMF)
+H <- H + trial(  "Firouzja"           , Radjabov_vs_Firouzja, RadW_lostTo_Fir_NMF)
+H <- H + trial(  "Radjabov"           , Radjabov_vs_Firouzja, FirW_lostTo_Rad_NMF)
+H <- H + trial(  "draw"             , Radjabov_vs_Firouzja, RadW_draws_Fir_NMF)
+H <- H + trial(  "draw"             , Radjabov_vs_Firouzja, FirW_draws_Rad_NMF)
+
+#MF
+H <- H + trial(c("Radjabov"  ,"white","MF"), Radjabov_vs_Firouzja, RadW_beats_Fir_MF)
+H <- H + trial(c("Firouzja","white","MF"), Radjabov_vs_Firouzja, FirW_beats_Rad_MF)
+H <- H + trial(  c("Firouzja","MF")           , Radjabov_vs_Firouzja, RadW_lostTo_Fir_MF)
+H <- H + trial(  c("Radjabov","MF")           , Radjabov_vs_Firouzja, FirW_lostTo_Rad_MF)
+H <- H + trial(  c("draw","MF")            , Radjabov_vs_Firouzja, RadW_draws_Fir_MF)
+H <- H + trial(  c("draw","MF")            , Radjabov_vs_Firouzja, FirW_draws_Rad_MF)
+
+#Radjabov VS Duda
+Radjabov_vs_Duda <- c("Radjabov","Duda","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Radjabov"  ,"white"), Radjabov_vs_Duda, RadW_beats_Dud_NMF)
+H <- H + trial(c("Duda","white"), Radjabov_vs_Duda, DudW_beats_Rad_NMF)
+H <- H + trial(  "Duda"           , Radjabov_vs_Duda, RadW_lostTo_Dud_NMF)
+H <- H + trial(  "Radjabov"           , Radjabov_vs_Duda, DudW_lostTo_Rad_NMF)
+H <- H + trial(  "draw"             , Radjabov_vs_Duda, RadW_draws_Dud_NMF)
+H <- H + trial(  "draw"             , Radjabov_vs_Duda, DudW_draws_Rad_NMF)
+
+#MF
+H <- H + trial(c("Radjabov"  ,"white","MF"), Radjabov_vs_Duda, RadW_beats_Dud_MF)
+H <- H + trial(c("Duda","white","MF"), Radjabov_vs_Duda, DudW_beats_Rad_MF)
+H <- H + trial(  c("Duda","MF")           , Radjabov_vs_Duda, RadW_lostTo_Dud_MF)
+H <- H + trial(  c("Radjabov","MF")           , Radjabov_vs_Duda, DudW_lostTo_Rad_MF)
+H <- H + trial(  c("draw","MF")            , Radjabov_vs_Duda, RadW_draws_Dud_MF)
+H <- H + trial(  c("draw","MF")            , Radjabov_vs_Duda, DudW_draws_Rad_MF)
+
+#Radjabov VS Rapport
+Radjabov_vs_Rapport <- c("Radjabov","Rapport","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Radjabov"  ,"white"), Radjabov_vs_Rapport, RadW_beats_Rap_NMF)
+H <- H + trial(c("Rapport","white"), Radjabov_vs_Rapport, RapW_beats_Rad_NMF)
+H <- H + trial(  "Rapport"           , Radjabov_vs_Rapport, RadW_lostTo_Rap_NMF)
+H <- H + trial(  "Radjabov"           , Radjabov_vs_Rapport, RapW_lostTo_Rad_NMF)
+H <- H + trial(  "draw"             , Radjabov_vs_Rapport, RadW_draws_Rap_NMF)
+H <- H + trial(  "draw"             , Radjabov_vs_Rapport, RapW_draws_Rad_NMF)
+
+#MF
+H <- H + trial(c("Radjabov"  ,"white","MF"), Radjabov_vs_Rapport, RadW_beats_Rap_MF)
+H <- H + trial(c("Rapport","white","MF"), Radjabov_vs_Rapport, RapW_beats_Rad_MF)
+H <- H + trial(  c("Rapport","MF")           , Radjabov_vs_Rapport, RadW_lostTo_Rap_MF)
+H <- H + trial(  c("Radjabov","MF")           , Radjabov_vs_Rapport, RapW_lostTo_Rad_MF)
+H <- H + trial(  c("draw","MF")            , Radjabov_vs_Rapport, RadW_draws_Rap_MF)
+H <- H + trial(  c("draw","MF")            , Radjabov_vs_Rapport, RapW_draws_Rad_MF)
+
+
+#Nakamura VS Caruana
+Nakamura_vs_Caruana <- c("Nakamura","Caruana","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Nakamura"  ,"white"), Nakamura_vs_Caruana, NakW_beats_Car_NMF)
+H <- H + trial(c("Caruana","white"), Nakamura_vs_Caruana, CarW_beats_Nak_NMF)
+H <- H + trial(  "Caruana"           , Nakamura_vs_Caruana, NakW_lostTo_Car_NMF)
+H <- H + trial(  "Nakamura"           , Nakamura_vs_Caruana, CarW_lostTo_Nak_NMF)
+H <- H + trial(  "draw"             , Nakamura_vs_Caruana, NakW_draws_Car_NMF)
+H <- H + trial(  "draw"             , Nakamura_vs_Caruana, CarW_draws_Nak_NMF)
+
+#MF
+H <- H + trial(c("Nakamura"  ,"white","MF"), Nakamura_vs_Caruana, NakW_beats_Car_MF)
+H <- H + trial(c("Caruana","white","MF"), Nakamura_vs_Caruana, CarW_beats_Nak_MF)
+H <- H + trial(  c("Caruana","MF")           , Nakamura_vs_Caruana, NakW_lostTo_Car_MF)
+H <- H + trial(  c("Nakamura","MF")           , Nakamura_vs_Caruana, CarW_lostTo_Nak_MF)
+H <- H + trial(  c("draw","MF")            , Nakamura_vs_Caruana, NakW_draws_Car_MF)
+H <- H + trial(  c("draw","MF")            , Nakamura_vs_Caruana, CarW_draws_Nak_MF)
+
+#Nakamura VS Firouzja
+Nakamura_vs_Firouzja <- c("Nakamura","Firouzja","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Nakamura"  ,"white"), Nakamura_vs_Firouzja, NakW_beats_Fir_NMF)
+H <- H + trial(c("Firouzja","white"), Nakamura_vs_Firouzja, FirW_beats_Nak_NMF)
+H <- H + trial(  "Firouzja"           , Nakamura_vs_Firouzja, NakW_lostTo_Fir_NMF)
+H <- H + trial(  "Nakamura"           , Nakamura_vs_Firouzja, FirW_lostTo_Nak_NMF)
+H <- H + trial(  "draw"             , Nakamura_vs_Firouzja, NakW_draws_Fir_NMF)
+H <- H + trial(  "draw"             , Nakamura_vs_Firouzja, FirW_draws_Nak_NMF)
+
+#MF
+H <- H + trial(c("Nakamura"  ,"white","MF"), Nakamura_vs_Firouzja, NakW_beats_Fir_MF)
+H <- H + trial(c("Firouzja","white","MF"), Nakamura_vs_Firouzja, FirW_beats_Nak_MF)
+H <- H + trial(  c("Firouzja","MF")           , Nakamura_vs_Firouzja, NakW_lostTo_Fir_MF)
+H <- H + trial(  c("Nakamura","MF")           , Nakamura_vs_Firouzja, FirW_lostTo_Nak_MF)
+H <- H + trial(  c("draw","MF")            , Nakamura_vs_Firouzja, NakW_draws_Fir_MF)
+H <- H + trial(  c("draw","MF")            , Nakamura_vs_Firouzja, FirW_draws_Nak_MF)
+
+#Nakamura VS Duda
+Nakamura_vs_Duda <- c("Nakamura","Duda","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Nakamura"  ,"white"), Nakamura_vs_Duda, NakW_beats_Dud_NMF)
+H <- H + trial(c("Duda","white"), Nakamura_vs_Duda, DudW_beats_Nak_NMF)
+H <- H + trial(  "Duda"           , Nakamura_vs_Duda, NakW_lostTo_Dud_NMF)
+H <- H + trial(  "Nakamura"           , Nakamura_vs_Duda, DudW_lostTo_Nak_NMF)
+H <- H + trial(  "draw"             , Nakamura_vs_Duda, NakW_draws_Dud_NMF)
+H <- H + trial(  "draw"             , Nakamura_vs_Duda, DudW_draws_Nak_NMF)
+
+#MF
+H <- H + trial(c("Nakamura"  ,"white","MF"), Nakamura_vs_Duda, NakW_beats_Dud_MF)
+H <- H + trial(c("Duda","white","MF"), Nakamura_vs_Duda, DudW_beats_Nak_MF)
+H <- H + trial(  c("Duda","MF")           , Nakamura_vs_Duda, NakW_lostTo_Dud_MF)
+H <- H + trial(  c("Nakamura","MF")           , Nakamura_vs_Duda, DudW_lostTo_Nak_MF)
+H <- H + trial(  c("draw","MF")            , Nakamura_vs_Duda, NakW_draws_Dud_MF)
+H <- H + trial(  c("draw","MF")            , Nakamura_vs_Duda, DudW_draws_Nak_MF)
+
+#Nakamura VS Rapport
+Nakamura_vs_Rapport <- c("Nakamura","Rapport","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Nakamura"  ,"white"), Nakamura_vs_Rapport, NakW_beats_Rap_NMF)
+H <- H + trial(c("Rapport","white"), Nakamura_vs_Rapport, RapW_beats_Nak_NMF)
+H <- H + trial(  "Rapport"           , Nakamura_vs_Rapport, NakW_lostTo_Rap_NMF)
+H <- H + trial(  "Nakamura"           , Nakamura_vs_Rapport, RapW_lostTo_Nak_NMF)
+H <- H + trial(  "draw"             , Nakamura_vs_Rapport, NakW_draws_Rap_NMF)
+H <- H + trial(  "draw"             , Nakamura_vs_Rapport, RapW_draws_Nak_NMF)
+
+#MF
+H <- H + trial(c("Nakamura"  ,"white","MF"), Nakamura_vs_Rapport, NakW_beats_Rap_MF)
+H <- H + trial(c("Rapport","white","MF"), Nakamura_vs_Rapport, RapW_beats_Nak_MF)
+H <- H + trial(  c("Rapport","MF")           , Nakamura_vs_Rapport, NakW_lostTo_Rap_MF)
+H <- H + trial(  c("Nakamura","MF")           , Nakamura_vs_Rapport, RapW_lostTo_Nak_MF)
+H <- H + trial(  c("draw","MF")            , Nakamura_vs_Rapport, NakW_draws_Rap_MF)
+H <- H + trial(  c("draw","MF")            , Nakamura_vs_Rapport, RapW_draws_Nak_MF)
+
+#Caruana VS Firouzja
+Caruana_vs_Firouzja <- c("Caruana","Firouzja","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Caruana"  ,"white"), Caruana_vs_Firouzja, NakW_beats_Fir_NMF)
+H <- H + trial(c("Firouzja","white"), Caruana_vs_Firouzja, FirW_beats_Nak_NMF)
+H <- H + trial(  "Firouzja"           , Caruana_vs_Firouzja, NakW_lostTo_Fir_NMF)
+H <- H + trial(  "Caruana"           , Caruana_vs_Firouzja, FirW_lostTo_Nak_NMF)
+H <- H + trial(  "draw"             , Caruana_vs_Firouzja, NakW_draws_Fir_NMF)
+H <- H + trial(  "draw"             , Caruana_vs_Firouzja, FirW_draws_Nak_NMF)
+
+#MF
+H <- H + trial(c("Caruana"  ,"white","MF"), Caruana_vs_Firouzja, NakW_beats_Fir_MF)
+H <- H + trial(c("Firouzja","white","MF"), Caruana_vs_Firouzja, FirW_beats_Nak_MF)
+H <- H + trial(  c("Firouzja","MF")           , Caruana_vs_Firouzja, NakW_lostTo_Fir_MF)
+H <- H + trial(  c("Caruana","MF")           , Caruana_vs_Firouzja, FirW_lostTo_Nak_MF)
+H <- H + trial(  c("draw","MF")            , Caruana_vs_Firouzja, NakW_draws_Fir_MF)
+H <- H + trial(  c("draw","MF")            , Caruana_vs_Firouzja, FirW_draws_Nak_MF)
+
+#Caruana VS Duda
+Caruana_vs_Duda <- c("Caruana","Duda","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Caruana"  ,"white"), Caruana_vs_Duda, NakW_beats_Dud_NMF)
+H <- H + trial(c("Duda","white"), Caruana_vs_Duda, DudW_beats_Nak_NMF)
+H <- H + trial(  "Duda"           , Caruana_vs_Duda, NakW_lostTo_Dud_NMF)
+H <- H + trial(  "Caruana"           , Caruana_vs_Duda, DudW_lostTo_Nak_NMF)
+H <- H + trial(  "draw"             , Caruana_vs_Duda, NakW_draws_Dud_NMF)
+H <- H + trial(  "draw"             , Caruana_vs_Duda, DudW_draws_Nak_NMF)
+
+#MF
+H <- H + trial(c("Caruana"  ,"white","MF"), Caruana_vs_Duda, NakW_beats_Dud_MF)
+H <- H + trial(c("Duda","white","MF"), Caruana_vs_Duda, DudW_beats_Nak_MF)
+H <- H + trial(  c("Duda","MF")           , Caruana_vs_Duda, NakW_lostTo_Dud_MF)
+H <- H + trial(  c("Caruana","MF")           , Caruana_vs_Duda, DudW_lostTo_Nak_MF)
+H <- H + trial(  c("draw","MF")            , Caruana_vs_Duda, NakW_draws_Dud_MF)
+H <- H + trial(  c("draw","MF")            , Caruana_vs_Duda, DudW_draws_Nak_MF)
+
+#Caruana VS Rapport
+Caruana_vs_Rapport <- c("Caruana","Rapport","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Caruana"  ,"white"), Caruana_vs_Rapport, NakW_beats_Rap_NMF)
+H <- H + trial(c("Rapport","white"), Caruana_vs_Rapport, RapW_beats_Nak_NMF)
+H <- H + trial(  "Rapport"           , Caruana_vs_Rapport, NakW_lostTo_Rap_NMF)
+H <- H + trial(  "Caruana"           , Caruana_vs_Rapport, RapW_lostTo_Nak_NMF)
+H <- H + trial(  "draw"             , Caruana_vs_Rapport, NakW_draws_Rap_NMF)
+H <- H + trial(  "draw"             , Caruana_vs_Rapport, RapW_draws_Nak_NMF)
+
+#MF
+H <- H + trial(c("Caruana"  ,"white","MF"), Caruana_vs_Rapport, NakW_beats_Rap_MF)
+H <- H + trial(c("Rapport","white","MF"), Caruana_vs_Rapport, RapW_beats_Nak_MF)
+H <- H + trial(  c("Rapport","MF")           , Caruana_vs_Rapport, NakW_lostTo_Rap_MF)
+H <- H + trial(  c("Caruana","MF")           , Caruana_vs_Rapport, RapW_lostTo_Nak_MF)
+H <- H + trial(  c("draw","MF")            , Caruana_vs_Rapport, NakW_draws_Rap_MF)
+H <- H + trial(  c("draw","MF")            , Caruana_vs_Rapport, RapW_draws_Nak_MF)
+
+#Firouzja VS Duda
+Firouzja_vs_Duda <- c("Firouzja","Duda","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Firouzja"  ,"white"), Firouzja_vs_Duda, FirW_beats_Dud_NMF)
+H <- H + trial(c("Duda","white"), Firouzja_vs_Duda, DudW_beats_Fir_NMF)
+H <- H + trial(  "Duda"           , Firouzja_vs_Duda, FirW_lostTo_Dud_NMF)
+H <- H + trial(  "Firouzja"           , Firouzja_vs_Duda, DudW_lostTo_Fir_NMF)
+H <- H + trial(  "draw"             , Firouzja_vs_Duda, FirW_draws_Dud_NMF)
+H <- H + trial(  "draw"             , Firouzja_vs_Duda, DudW_draws_Fir_NMF)
+
+#MF
+H <- H + trial(c("Firouzja"  ,"white","MF"), Firouzja_vs_Duda, FirW_beats_Dud_MF)
+H <- H + trial(c("Duda","white","MF"), Firouzja_vs_Duda, DudW_beats_Fir_MF)
+H <- H + trial(  c("Duda","MF")           , Firouzja_vs_Duda, FirW_lostTo_Dud_MF)
+H <- H + trial(  c("Firouzja","MF")           , Firouzja_vs_Duda, DudW_lostTo_Fir_MF)
+H <- H + trial(  c("draw","MF")            , Firouzja_vs_Duda, FirW_draws_Dud_MF)
+H <- H + trial(  c("draw","MF")            , Firouzja_vs_Duda, DudW_draws_Fir_MF)
+
+#Firouzja VS Rapport
+Firouzja_vs_Rapport <- c("Firouzja","Rapport","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Firouzja"  ,"white"), Firouzja_vs_Rapport, FirW_beats_Rap_NMF)
+H <- H + trial(c("Rapport","white"), Firouzja_vs_Rapport, RapW_beats_Fir_NMF)
+H <- H + trial(  "Rapport"           , Firouzja_vs_Rapport, FirW_lostTo_Rap_NMF)
+H <- H + trial(  "Firouzja"           , Firouzja_vs_Rapport, RapW_lostTo_Fir_NMF)
+H <- H + trial(  "draw"             , Firouzja_vs_Rapport, FirW_draws_Rap_NMF)
+H <- H + trial(  "draw"             , Firouzja_vs_Rapport, RapW_draws_Fir_NMF)
+
+#MF
+H <- H + trial(c("Firouzja"  ,"white","MF"), Firouzja_vs_Rapport, FirW_beats_Rap_MF)
+H <- H + trial(c("Rapport","white","MF"), Firouzja_vs_Rapport, RapW_beats_Fir_MF)
+H <- H + trial(  c("Rapport","MF")           , Firouzja_vs_Rapport, FirW_lostTo_Rap_MF)
+H <- H + trial(  c("Firouzja","MF")           , Firouzja_vs_Rapport, RapW_lostTo_Fir_MF)
+H <- H + trial(  c("draw","MF")            , Firouzja_vs_Rapport, FirW_draws_Rap_MF)
+H <- H + trial(  c("draw","MF")            , Firouzja_vs_Rapport, RapW_draws_Fir_MF)
+
+#Duda VS Rapport
+Duda_vs_Rapport <- c("Duda","Rapport","white","draw","MF")  # all "players", real and imaginary
+
+H <- H + trial(c("Duda"  ,"white"), Duda_vs_Rapport, DudW_beats_Rap_NMF)
+H <- H + trial(c("Rapport","white"), Duda_vs_Rapport, RapW_beats_Dud_NMF)
+H <- H + trial(  "Rapport"           , Duda_vs_Rapport, DudW_lostTo_Rap_NMF)
+H <- H + trial(  "Duda"           , Duda_vs_Rapport, RapW_lostTo_Dud_NMF)
+H <- H + trial(  "draw"             , Duda_vs_Rapport, DudW_draws_Rap_NMF)
+H <- H + trial(  "draw"             , Duda_vs_Rapport, RapW_draws_Dud_NMF)
+
+#MF
+H <- H + trial(c("Duda"  ,"white","MF"), Duda_vs_Rapport, DudW_beats_Rap_MF)
+H <- H + trial(c("Rapport","white","MF"), Duda_vs_Rapport, RapW_beats_Dud_MF)
+H <- H + trial(  c("Rapport","MF")           , Duda_vs_Rapport, DudW_lostTo_Rap_MF)
+H <- H + trial(  c("Duda","MF")           , Duda_vs_Rapport, RapW_lostTo_Dud_MF)
+H <- H + trial(  c("draw","MF")            , Duda_vs_Rapport, DudW_draws_Rap_MF)
+H <- H + trial(  c("draw","MF")            , Duda_vs_Rapport, RapW_draws_Dud_MF)
+
+detach(results)
+
+Hyper_Fide2022 <- H
+Hyper_Fide2022
+(Hyper_Fide2022_maxp <- maxp(Hyper_Fide2022))
+
+```
+
+
+```{r}
+sum(Hyper_Fide2022_maxp)
+
+names <- names(Hyper_Fide2022_maxp)
+results1948_df <- data.frame(Entity = names, Ranking = unique(Hyper_Fide2022_maxp))
+results1948_df
+
+library(ggplot2)
+ggplot(results1948_df, aes(Ranking,Entity))+ geom_point() + labs(title = "2022 World Candidates Tournament ranking (w.r.t Mental Fatigue)")
+```
+
+##Hypothesis Testing
+
+$H_0 : p_1 =... = p_n$
+
+$H_1 : p_1 \neq... \neq p_n$
+
+```{r}
+test <- equalp.test(H)
+test
+```
+
+The results above show a p-value = `r test$p.value` which is lower than a significance level of 0.05. This suggests that all the entities have different strengths.
