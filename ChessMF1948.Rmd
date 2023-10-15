@@ -29,7 +29,7 @@ factorial(5)/factorial(5 - 2)
 #Hyper2 object
 ```{r}
 fide48 <- c(
-#Ewue VS Keres
+#Euwe VS Keres
 EuwW_lostTo_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
 EuwW_beats_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
 EuwW_draws_Ker_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Keres" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
@@ -73,7 +73,7 @@ EuwW_draws_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$Black
 
 #--------------------------------------------------------------------------------------------------------------------------
 
-#Ewue VS Reshevsky
+#Euwe VS Reshevsky
 EuwW_lostTo_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
 EuwW_beats_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
 EuwW_draws_Res_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer== "Reshevsky" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
@@ -117,7 +117,7 @@ SmyW_draws_Bot_MF = dim(Fide1948[Fide1948$WhitePlayer == "Smyslov" & Fide1948$Bl
 
 #--------------------------------------------------------------------------------------------------------------------------
 
-#Ewue VS Smyslov
+#Euwe VS Smyslov
 EuwW_lostTo_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer == "Smyslov" & Fide1948$White == 0 & Fide1948$Moves < 40,])[1],
 EuwW_beats_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer == "Smyslov" & Fide1948$White == 1 & Fide1948$Moves < 40,])[1],
 EuwW_draws_Smy_NMF = dim(Fide1948[Fide1948$WhitePlayer == "Euwe" & Fide1948$BlackPlayer == "Smyslov" & Fide1948$White == 0.5 & Fide1948$Moves < 40,])[1],
@@ -185,24 +185,24 @@ results <- as.list(fide48)
 attach(results)
 H <- hyper2()
 
-# Ewue VS Keres
-Ewue_vs_Keres <- c("Ewue","Keres","white","draw","MF")  # all "players", real and imaginary
+# Euwe VS Keres
+Euwe_vs_Keres <- c("Euwe","Keres","white","draw","MF")  # all "players", real and imaginary
 
 #No MF
-H <- H + trial(c("Ewue"  ,"white"), Ewue_vs_Keres, EuwW_beats_Ker_NMF)
-H <- H + trial(c("Keres","white"), Ewue_vs_Keres, KerW_beats_Euw_NMF)
-H <- H + trial(  "Keres"           , Ewue_vs_Keres, EuwW_lostTo_Ker_NMF)
-H <- H + trial(  "Ewue"           , Ewue_vs_Keres, KerW_lostTo_Euw_NMF)
-H <- H + trial(  "draw"             , Ewue_vs_Keres, EuwW_draws_Ker_NMF)
-H <- H + trial(  "draw"             , Ewue_vs_Keres, KerW_draws_Euw_NMF)
+H <- H + trial(c("Euwe"  ,"white"), Euwe_vs_Keres, EuwW_beats_Ker_NMF)
+H <- H + trial(c("Keres","white"), Euwe_vs_Keres, KerW_beats_Euw_NMF)
+H <- H + trial(  "Keres"           , Euwe_vs_Keres, EuwW_lostTo_Ker_NMF)
+H <- H + trial(  "Euwe"           , Euwe_vs_Keres, KerW_lostTo_Euw_NMF)
+H <- H + trial(  "draw"             , Euwe_vs_Keres, EuwW_draws_Ker_NMF)
+H <- H + trial(  "draw"             , Euwe_vs_Keres, KerW_draws_Euw_NMF)
 
 #MF
-H <- H + trial(c("Ewue"  ,"white","MF"), Ewue_vs_Keres, EuwW_beats_Ker_MF)
-H <- H + trial(c("Keres","white","MF"), Ewue_vs_Keres, KerW_beats_Euw_MF)
-H <- H + trial(  c("Keres","MF")           , Ewue_vs_Keres, EuwW_lostTo_Ker_MF)
-H <- H + trial(  c("Ewue","MF")           , Ewue_vs_Keres, KerW_lostTo_Euw_MF)
-H <- H + trial(  c("draw","MF")            , Ewue_vs_Keres, EuwW_draws_Ker_MF)
-H <- H + trial(  c("draw","MF")            , Ewue_vs_Keres, KerW_draws_Euw_MF)
+H <- H + trial(c("Euwe"  ,"white","MF"), Euwe_vs_Keres, EuwW_beats_Ker_MF)
+H <- H + trial(c("Keres","white","MF"), Euwe_vs_Keres, KerW_beats_Euw_MF)
+H <- H + trial(  c("Keres","MF")           , Euwe_vs_Keres, EuwW_lostTo_Ker_MF)
+H <- H + trial(  c("Euwe","MF")           , Euwe_vs_Keres, KerW_lostTo_Euw_MF)
+H <- H + trial(  c("draw","MF")            , Euwe_vs_Keres, EuwW_draws_Ker_MF)
+H <- H + trial(  c("draw","MF")            , Euwe_vs_Keres, KerW_draws_Euw_MF)
 
 #Smyslov VS Reshevsky
 Smyslov_vs_Reshevsky <- c("Smyslov","Reshevsky","white","draw","MF")  # all "players", real and imaginary
@@ -243,24 +243,24 @@ H <- H + trial(  c("draw","MF")            , Botvinnik_vs_Euwe, EuwW_draws_Bot_M
 H <- H + trial(  c("draw","MF")            , Botvinnik_vs_Euwe, BotW_draws_Euw_MF)
 #=========================================================================================================
 #=========================================================================================================
-#Ewue VS Reshevsky
-Ewue_vs_Reshevsky <- c("Ewue","Reshevsky","white","draw","MF")  # all "players", real and imaginary
+#Euwe VS Reshevsky
+Euwe_vs_Reshevsky <- c("Euwe","Reshevsky","white","draw","MF")  # all "players", real and imaginary
 
 #No MF
-H <- H + trial(c("Ewue"  ,"white"), Ewue_vs_Reshevsky, EuwW_beats_Res_NMF)
-H <- H + trial(c("Reshevsky","white"), Ewue_vs_Reshevsky, ResW_beats_Euw_NMF)
-H <- H + trial(  "Reshevsky"           , Ewue_vs_Reshevsky, EuwW_lostTo_Res_NMF)
-H <- H + trial(  "Ewue"           , Ewue_vs_Reshevsky, ResW_lostTo_Euw_NMF)
-H <- H + trial(  "draw"             , Ewue_vs_Reshevsky, EuwW_draws_Res_NMF)
-H <- H + trial(  "draw"             , Ewue_vs_Reshevsky, ResW_draws_Euw_NMF)
+H <- H + trial(c("Euwe"  ,"white"), Euwe_vs_Reshevsky, EuwW_beats_Res_NMF)
+H <- H + trial(c("Reshevsky","white"), Euwe_vs_Reshevsky, ResW_beats_Euw_NMF)
+H <- H + trial(  "Reshevsky"           , Euwe_vs_Reshevsky, EuwW_lostTo_Res_NMF)
+H <- H + trial(  "Euwe"           , Euwe_vs_Reshevsky, ResW_lostTo_Euw_NMF)
+H <- H + trial(  "draw"             , Euwe_vs_Reshevsky, EuwW_draws_Res_NMF)
+H <- H + trial(  "draw"             , Euwe_vs_Reshevsky, ResW_draws_Euw_NMF)
 
 #MF
-H <- H + trial(c("Ewue"  ,"white","MF"), Ewue_vs_Reshevsky, EuwW_beats_Res_MF)
-H <- H + trial(c("Reshevsky","white","MF"), Ewue_vs_Reshevsky, ResW_beats_Euw_MF)
-H <- H + trial(  c("Reshevsky","MF")           , Ewue_vs_Reshevsky, EuwW_lostTo_Res_MF)
-H <- H + trial(  c("Ewue","MF")           , Ewue_vs_Reshevsky, ResW_lostTo_Euw_MF)
-H <- H + trial(  c("draw","MF")            , Ewue_vs_Reshevsky, EuwW_draws_Res_MF)
-H <- H + trial(  c("draw","MF")            , Ewue_vs_Reshevsky, ResW_draws_Euw_MF)
+H <- H + trial(c("Euwe"  ,"white","MF"), Euwe_vs_Reshevsky, EuwW_beats_Res_MF)
+H <- H + trial(c("Reshevsky","white","MF"), Euwe_vs_Reshevsky, ResW_beats_Euw_MF)
+H <- H + trial(  c("Reshevsky","MF")           , Euwe_vs_Reshevsky, EuwW_lostTo_Res_MF)
+H <- H + trial(  c("Euwe","MF")           , Euwe_vs_Reshevsky, ResW_lostTo_Euw_MF)
+H <- H + trial(  c("draw","MF")            , Euwe_vs_Reshevsky, EuwW_draws_Res_MF)
+H <- H + trial(  c("draw","MF")            , Euwe_vs_Reshevsky, ResW_draws_Euw_MF)
 
 #Smyslov VS Keres
 Smyslov_vs_Keres <- c("Smyslov","Keres","white","draw","MF")  # all "players", real and imaginary
@@ -301,24 +301,24 @@ H <- H + trial(  c("draw","MF")            , Botvinnik_vs_Smyslov, SmyW_draws_Bo
 H <- H + trial(  c("draw","MF")            , Botvinnik_vs_Smyslov, BotW_draws_Smy_MF)
 #=========================================================================================================
 #=========================================================================================================
-#Ewue VS Smyslov
-Ewue_vs_Smyslov <- c("Ewue","Smyslov","white","draw","MF")  # all "players", real and imaginary
+#Euwe VS Smyslov
+Euwe_vs_Smyslov <- c("Euwe","Smyslov","white","draw","MF")  # all "players", real and imaginary
 
 #No MF
-H <- H + trial(c("Ewue"  ,"white"), Ewue_vs_Smyslov, EuwW_beats_Smy_NMF)
-H <- H + trial(c("Smyslov","white"), Ewue_vs_Smyslov, SmyW_beats_Euw_NMF)
-H <- H + trial(  "Smyslov"           , Ewue_vs_Smyslov, EuwW_lostTo_Smy_NMF)
-H <- H + trial(  "Ewue"           , Ewue_vs_Smyslov, SmyW_lostTo_Euw_NMF)
-H <- H + trial(  "draw"             , Ewue_vs_Smyslov, EuwW_draws_Smy_NMF)
-H <- H + trial(  "draw"             , Ewue_vs_Smyslov, SmyW_draws_Euw_NMF)
+H <- H + trial(c("Euwe"  ,"white"), Euwe_vs_Smyslov, EuwW_beats_Smy_NMF)
+H <- H + trial(c("Smyslov","white"), Euwe_vs_Smyslov, SmyW_beats_Euw_NMF)
+H <- H + trial(  "Smyslov"           , Euwe_vs_Smyslov, EuwW_lostTo_Smy_NMF)
+H <- H + trial(  "Euwe"           , Euwe_vs_Smyslov, SmyW_lostTo_Euw_NMF)
+H <- H + trial(  "draw"             , Euwe_vs_Smyslov, EuwW_draws_Smy_NMF)
+H <- H + trial(  "draw"             , Euwe_vs_Smyslov, SmyW_draws_Euw_NMF)
 
 #MF
-H <- H + trial(c("Ewue"  ,"white","MF"), Ewue_vs_Smyslov, EuwW_beats_Smy_MF)
-H <- H + trial(c("Smyslov","white","MF"), Ewue_vs_Smyslov, SmyW_beats_Euw_MF)
-H <- H + trial(  c("Smyslov","MF")           , Ewue_vs_Smyslov, EuwW_lostTo_Smy_MF)
-H <- H + trial(  c("Ewue","MF")           , Ewue_vs_Smyslov, SmyW_lostTo_Euw_MF)
-H <- H + trial(  c("draw","MF")            , Ewue_vs_Smyslov, EuwW_draws_Smy_MF)
-H <- H + trial(  c("draw","MF")            , Ewue_vs_Smyslov, SmyW_draws_Euw_MF)
+H <- H + trial(c("Euwe"  ,"white","MF"), Euwe_vs_Smyslov, EuwW_beats_Smy_MF)
+H <- H + trial(c("Smyslov","white","MF"), Euwe_vs_Smyslov, SmyW_beats_Euw_MF)
+H <- H + trial(  c("Smyslov","MF")           , Euwe_vs_Smyslov, EuwW_lostTo_Smy_MF)
+H <- H + trial(  c("Euwe","MF")           , Euwe_vs_Smyslov, SmyW_lostTo_Euw_MF)
+H <- H + trial(  c("draw","MF")            , Euwe_vs_Smyslov, EuwW_draws_Smy_MF)
+H <- H + trial(  c("draw","MF")            , Euwe_vs_Smyslov, SmyW_draws_Euw_MF)
 
 #Reshevsky VS Botvinnik
 Reshevsky_vs_Botvinnik <- c("Reshevsky","Botvinnik","white","draw","MF")  # all "players", real and imaginary
@@ -388,14 +388,17 @@ Hyper_fide1948
 
 
 ```{r}
-sum(Hyper_fide1948_maxp)
+pie(Hyper_fide1948_maxp)
 
 names <- names(Hyper_fide1948_maxp)
 results1948_df <- data.frame(Entity = names, Ranking = unique(Hyper_fide1948_maxp))
 results1948_df
 
+pie(Hyper_fide1948_maxp)
+
 library(ggplot2)
-ggplot(results1948_df, aes(Ranking,Entity))+ geom_point() + labs(title = "1948 World Championship ranking (w.r.t Mental Fatigue)")
+ggplot(results1948_df, aes(Ranking,Entity))+ geom_point() + labs(title = "1948 World Championship ranking (w.r.t Mental Fatigue)") + geom_text(aes(label = round(Ranking,3)), nudge_x = 0.01, nudge_y = 0.3, size = 3)
+
 ```
 
 ##Hypothesis Testing
@@ -414,7 +417,7 @@ The results above show a p-value = `r test$p.value` which is lower than a signif
 Interestingly, Botvinnik has a much higher strength compared to our imaginary fatigue monster of the tournament. We can investigate this by testing if $P_{Bot} = \mathfrak{F}$.
 
 ```{r}
-
-sumep.
+gt1948 <- specificp.gt.test(Hyper_fide1948, "MF", 0);gt1948
+samep.test(Hyper_fide1948, c("MF","draw"))
 ```
 

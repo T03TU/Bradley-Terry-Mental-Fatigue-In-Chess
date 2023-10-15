@@ -377,19 +377,19 @@ fide22 <- c(
   FirW_draws_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Firouzja" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
  
  #Caruana VS Duda
-  CarW_lostTo_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
-  CarW_beats_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
-  CarW_draws_Fir_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
-  FirW_lostTo_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
-  FirW_beats_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
-  FirW_draws_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  CarW_lostTo_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  CarW_beats_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  CarW_draws_Dud_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
+  DudW_lostTo_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
+  DudW_beats_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves < 40,])[1],
+  DudW_draws_Car_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves < 40,])[1],
   
-  CarW_lostTo_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
-  CarW_beats_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
-  CarW_draws_Fir_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
-  FirW_lostTo_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
-  FirW_beats_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
-  FirW_draws_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  CarW_lostTo_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  CarW_beats_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  CarW_draws_Dud_MF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Duda" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
+  DudW_lostTo_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0 & Fide2022$Moves >= 40,])[1],
+  DudW_beats_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 1 & Fide2022$Moves >= 40,])[1],
+  DudW_draws_Car_MF = dim(Fide2022[Fide2022$WhitePlayer == "Duda" & Fide2022$BlackPlayer== "Caruana" & Fide2022$White == 0.5 & Fide2022$Moves >= 40,])[1],
  
  #Caruana VS Rapport
   CarW_lostTo_Rap_NMF = dim(Fide2022[Fide2022$WhitePlayer == "Caruana" & Fide2022$BlackPlayer== "Rapport" & Fide2022$White == 0 & Fide2022$Moves < 40,])[1],
@@ -721,12 +721,12 @@ H <- H + trial(  c("draw","MF")            , Radjabov_vs_Nakamura, NakW_draws_Ra
 #Radjabov VS Caruana
 Radjabov_vs_Caruana <- c("Radjabov","Caruana","white","draw","MF")  # all "players", real and imaginary
 
-H <- H + trial(c("Radjabov"  ,"white"), Radjabov_vs_Caruana, RadW_beats_Nak_NMF)
-H <- H + trial(c("Caruana","white"), Radjabov_vs_Caruana, NakW_beats_Rad_NMF)
-H <- H + trial(  "Caruana"           , Radjabov_vs_Caruana, RadW_lostTo_Nak_NMF)
-H <- H + trial(  "Radjabov"           , Radjabov_vs_Caruana, NakW_lostTo_Rad_NMF)
-H <- H + trial(  "draw"             , Radjabov_vs_Caruana, RadW_draws_Nak_NMF)
-H <- H + trial(  "draw"             , Radjabov_vs_Caruana, NakW_draws_Rad_NMF)
+H <- H + trial(c("Radjabov"  ,"white"), Radjabov_vs_Caruana, RadW_beats_Car_NMF)
+H <- H + trial(c("Caruana","white"), Radjabov_vs_Caruana, CarW_beats_Rad_NMF)
+H <- H + trial(  "Caruana"           , Radjabov_vs_Caruana, RadW_lostTo_Car_NMF)
+H <- H + trial(  "Radjabov"           , Radjabov_vs_Caruana, CarW_lostTo_Rad_NMF)
+H <- H + trial(  "draw"             , Radjabov_vs_Caruana, RadW_draws_Car_NMF)
+H <- H + trial(  "draw"             , Radjabov_vs_Caruana, CarW_draws_Rad_NMF)
 
 #MF
 H <- H + trial(c("Radjabov"  ,"white","MF"), Radjabov_vs_Caruana, RadW_beats_Car_MF)
@@ -866,56 +866,56 @@ H <- H + trial(  c("draw","MF")            , Nakamura_vs_Rapport, RapW_draws_Nak
 #Caruana VS Firouzja
 Caruana_vs_Firouzja <- c("Caruana","Firouzja","white","draw","MF")  # all "players", real and imaginary
 
-H <- H + trial(c("Caruana"  ,"white"), Caruana_vs_Firouzja, NakW_beats_Fir_NMF)
-H <- H + trial(c("Firouzja","white"), Caruana_vs_Firouzja, FirW_beats_Nak_NMF)
-H <- H + trial(  "Firouzja"           , Caruana_vs_Firouzja, NakW_lostTo_Fir_NMF)
-H <- H + trial(  "Caruana"           , Caruana_vs_Firouzja, FirW_lostTo_Nak_NMF)
-H <- H + trial(  "draw"             , Caruana_vs_Firouzja, NakW_draws_Fir_NMF)
-H <- H + trial(  "draw"             , Caruana_vs_Firouzja, FirW_draws_Nak_NMF)
+H <- H + trial(c("Caruana"  ,"white"), Caruana_vs_Firouzja, CarW_beats_Fir_NMF)
+H <- H + trial(c("Firouzja","white"), Caruana_vs_Firouzja, FirW_beats_Car_NMF)
+H <- H + trial(  "Firouzja"           , Caruana_vs_Firouzja, CarW_lostTo_Fir_NMF)
+H <- H + trial(  "Caruana"           , Caruana_vs_Firouzja, FirW_lostTo_Car_NMF)
+H <- H + trial(  "draw"             , Caruana_vs_Firouzja, CarW_draws_Fir_NMF)
+H <- H + trial(  "draw"             , Caruana_vs_Firouzja, FirW_draws_Car_NMF)
 
 #MF
-H <- H + trial(c("Caruana"  ,"white","MF"), Caruana_vs_Firouzja, NakW_beats_Fir_MF)
-H <- H + trial(c("Firouzja","white","MF"), Caruana_vs_Firouzja, FirW_beats_Nak_MF)
-H <- H + trial(  c("Firouzja","MF")           , Caruana_vs_Firouzja, NakW_lostTo_Fir_MF)
-H <- H + trial(  c("Caruana","MF")           , Caruana_vs_Firouzja, FirW_lostTo_Nak_MF)
-H <- H + trial(  c("draw","MF")            , Caruana_vs_Firouzja, NakW_draws_Fir_MF)
-H <- H + trial(  c("draw","MF")            , Caruana_vs_Firouzja, FirW_draws_Nak_MF)
+H <- H + trial(c("Caruana"  ,"white","MF"), Caruana_vs_Firouzja, CarW_beats_Fir_MF)
+H <- H + trial(c("Firouzja","white","MF"), Caruana_vs_Firouzja, FirW_beats_Car_MF)
+H <- H + trial(  c("Firouzja","MF")           , Caruana_vs_Firouzja, CarW_lostTo_Fir_MF)
+H <- H + trial(  c("Caruana","MF")           , Caruana_vs_Firouzja, FirW_lostTo_Car_MF)
+H <- H + trial(  c("draw","MF")            , Caruana_vs_Firouzja, CarW_draws_Fir_MF)
+H <- H + trial(  c("draw","MF")            , Caruana_vs_Firouzja, FirW_draws_Car_MF)
 
 #Caruana VS Duda
 Caruana_vs_Duda <- c("Caruana","Duda","white","draw","MF")  # all "players", real and imaginary
 
-H <- H + trial(c("Caruana"  ,"white"), Caruana_vs_Duda, NakW_beats_Dud_NMF)
-H <- H + trial(c("Duda","white"), Caruana_vs_Duda, DudW_beats_Nak_NMF)
-H <- H + trial(  "Duda"           , Caruana_vs_Duda, NakW_lostTo_Dud_NMF)
-H <- H + trial(  "Caruana"           , Caruana_vs_Duda, DudW_lostTo_Nak_NMF)
-H <- H + trial(  "draw"             , Caruana_vs_Duda, NakW_draws_Dud_NMF)
-H <- H + trial(  "draw"             , Caruana_vs_Duda, DudW_draws_Nak_NMF)
+H <- H + trial(c("Caruana"  ,"white"), Caruana_vs_Duda, CarW_beats_Dud_NMF)
+H <- H + trial(c("Duda","white"), Caruana_vs_Duda, DudW_beats_Car_NMF)
+H <- H + trial(  "Duda"           , Caruana_vs_Duda, CarW_lostTo_Dud_NMF)
+H <- H + trial(  "Caruana"           , Caruana_vs_Duda, DudW_lostTo_Car_NMF)
+H <- H + trial(  "draw"             , Caruana_vs_Duda, CarW_draws_Dud_NMF)
+H <- H + trial(  "draw"             , Caruana_vs_Duda, DudW_draws_Car_NMF)
 
 #MF
-H <- H + trial(c("Caruana"  ,"white","MF"), Caruana_vs_Duda, NakW_beats_Dud_MF)
-H <- H + trial(c("Duda","white","MF"), Caruana_vs_Duda, DudW_beats_Nak_MF)
-H <- H + trial(  c("Duda","MF")           , Caruana_vs_Duda, NakW_lostTo_Dud_MF)
-H <- H + trial(  c("Caruana","MF")           , Caruana_vs_Duda, DudW_lostTo_Nak_MF)
-H <- H + trial(  c("draw","MF")            , Caruana_vs_Duda, NakW_draws_Dud_MF)
-H <- H + trial(  c("draw","MF")            , Caruana_vs_Duda, DudW_draws_Nak_MF)
+H <- H + trial(c("Caruana"  ,"white","MF"), Caruana_vs_Duda, CarW_beats_Dud_MF)
+H <- H + trial(c("Duda","white","MF"), Caruana_vs_Duda, DudW_beats_Car_MF)
+H <- H + trial(  c("Duda","MF")           , Caruana_vs_Duda, CarW_lostTo_Dud_MF)
+H <- H + trial(  c("Caruana","MF")           , Caruana_vs_Duda, DudW_lostTo_Car_MF)
+H <- H + trial(  c("draw","MF")            , Caruana_vs_Duda, CarW_draws_Dud_MF)
+H <- H + trial(  c("draw","MF")            , Caruana_vs_Duda, DudW_draws_Car_MF)
 
 #Caruana VS Rapport
 Caruana_vs_Rapport <- c("Caruana","Rapport","white","draw","MF")  # all "players", real and imaginary
 
-H <- H + trial(c("Caruana"  ,"white"), Caruana_vs_Rapport, NakW_beats_Rap_NMF)
-H <- H + trial(c("Rapport","white"), Caruana_vs_Rapport, RapW_beats_Nak_NMF)
-H <- H + trial(  "Rapport"           , Caruana_vs_Rapport, NakW_lostTo_Rap_NMF)
-H <- H + trial(  "Caruana"           , Caruana_vs_Rapport, RapW_lostTo_Nak_NMF)
-H <- H + trial(  "draw"             , Caruana_vs_Rapport, NakW_draws_Rap_NMF)
-H <- H + trial(  "draw"             , Caruana_vs_Rapport, RapW_draws_Nak_NMF)
+H <- H + trial(c("Caruana"  ,"white"), Caruana_vs_Rapport, CarW_beats_Rap_NMF)
+H <- H + trial(c("Rapport","white"), Caruana_vs_Rapport, RapW_beats_Car_NMF)
+H <- H + trial(  "Rapport"           , Caruana_vs_Rapport, CarW_lostTo_Rap_NMF)
+H <- H + trial(  "Caruana"           , Caruana_vs_Rapport, RapW_lostTo_Car_NMF)
+H <- H + trial(  "draw"             , Caruana_vs_Rapport, CarW_draws_Rap_NMF)
+H <- H + trial(  "draw"             , Caruana_vs_Rapport, RapW_draws_Car_NMF)
 
 #MF
-H <- H + trial(c("Caruana"  ,"white","MF"), Caruana_vs_Rapport, NakW_beats_Rap_MF)
-H <- H + trial(c("Rapport","white","MF"), Caruana_vs_Rapport, RapW_beats_Nak_MF)
-H <- H + trial(  c("Rapport","MF")           , Caruana_vs_Rapport, NakW_lostTo_Rap_MF)
-H <- H + trial(  c("Caruana","MF")           , Caruana_vs_Rapport, RapW_lostTo_Nak_MF)
-H <- H + trial(  c("draw","MF")            , Caruana_vs_Rapport, NakW_draws_Rap_MF)
-H <- H + trial(  c("draw","MF")            , Caruana_vs_Rapport, RapW_draws_Nak_MF)
+H <- H + trial(c("Caruana"  ,"white","MF"), Caruana_vs_Rapport, CarW_beats_Rap_MF)
+H <- H + trial(c("Rapport","white","MF"), Caruana_vs_Rapport, RapW_beats_Car_MF)
+H <- H + trial(  c("Rapport","MF")           , Caruana_vs_Rapport, CarW_lostTo_Rap_MF)
+H <- H + trial(  c("Caruana","MF")           , Caruana_vs_Rapport, RapW_lostTo_Car_MF)
+H <- H + trial(  c("draw","MF")            , Caruana_vs_Rapport, CarW_draws_Rap_MF)
+H <- H + trial(  c("draw","MF")            , Caruana_vs_Rapport, RapW_draws_Car_MF)
 
 #Firouzja VS Duda
 Firouzja_vs_Duda <- c("Firouzja","Duda","white","draw","MF")  # all "players", real and imaginary
@@ -984,11 +984,11 @@ Hyper_Fide2022
 sum(Hyper_Fide2022_maxp)
 
 names <- names(Hyper_Fide2022_maxp)
-results1948_df <- data.frame(Entity = names, Ranking = unique(Hyper_Fide2022_maxp))
-results1948_df
+results2022_df <- data.frame(Entity = names, Ranking = unique(Hyper_Fide2022_maxp))
+results2022_df
 
 library(ggplot2)
-ggplot(results1948_df, aes(Ranking,Entity))+ geom_point() + labs(title = "2022 World Candidates Tournament ranking (w.r.t Mental Fatigue)")
+ggplot(results2022_df, aes(Ranking,Entity))+ geom_point() + labs(title = "2022 World Candidates Tournament ranking (w.r.t Mental Fatigue)")  + geom_text(aes(label = round(Ranking,3)), nudge_x = 0.01, nudge_y = 0.3, size = 3)
 ```
 
 ##Hypothesis Testing
@@ -1003,3 +1003,19 @@ test
 ```
 
 The results above show a p-value = `r test$p.value` which is lower than a significance level of 0.05. This suggests that all the entities have different strengths.
+
+Now, we should consider testing for the existence of the fatigue monster.
+
+$H_0 : \mathfrak{F} \leq 0$
+$H_1 : \mathfrak{F} > 0$
+
+```{r, cache=TRUE}
+gt <- specificp.gt.test(Hyper_Fide2022, "MF", 0); gt
+lt <- specificp.lt.test(Hyper_Fide2022, "MF", 0); lt
+```
+
+
+```{r}
+gt$null_hypothesis; lt$null_hypothesis 
+```
+

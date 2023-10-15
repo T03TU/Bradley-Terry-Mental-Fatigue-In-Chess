@@ -1,7 +1,6 @@
 
 
 ```{r}
-rm(list = ls())
 library(hyper2)
 ```
 
@@ -20,9 +19,8 @@ fide23
 
 ##2022 Candidates game
 ```{r}
-rm(list=ls())
 library(readxl)
-fide22 <- read_excel("~/Academic Life/Master of Analytics/ENGE817 STEM Research paper/fide22.xlsx")
+fide22 <- read_excel("~/Academic Life/Master of Analytics/ENGE817 STEM Research paper/Fide2022.xlsx")
 View(fide22)
 ```
 
@@ -74,6 +72,15 @@ results_df <- data.frame(results,  stringsAsFactors = FALSE)
 MF <- c(results["DinWMF"], results["RadWMF"], results["NakWMF"], results["CarWMF"], 
 results["FirWMF"], results["DudWMF"], results["NepBMF"], results["DinBMF"], results["CarBMF"], results["FirBMF"], results["DMF"])
 ```
+
+#Hypothesis Testing
+
+```{r}
+samep.test(BT, c("NepB","NepBMF", "NepW"))
+samep.test(BT, c("DinWMF", "DinBMF"))
+```
+
+
 
 ```{r}
 MF
@@ -215,7 +222,7 @@ equalp.test(BT1948)
 
 
 ```{r}
-samep.test(BT, c("D","DMF"))
+samep.test(BT1948, c("BotW","BotBMF"))
 samep.test(BT1948, c("D","DMF"))
 ```
 
